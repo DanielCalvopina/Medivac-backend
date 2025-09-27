@@ -1,0 +1,497 @@
+// ---------- Setup ----------
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ---------- Enums ----------
+enum UserRole {
+  Admin
+  Operador
+  Cliente
+  Supervisor
+}
+
+enum UserState {
+  Invitado
+  Activo
+  Bloqueado
+}
+
+enum TravelType {
+  CARGADO
+  VACIO
+}
+
+enum OwnerType {
+  LOAD
+  UNLOAD
+  BITACORA
+  UNIT
+  TICKET
+}
+
+enum DocTipo {
+  TarjetaCirculacion
+  Seguro
+  Verificacion
+  NOM005
+  Otro
+}
+
+enum EvidenceCategoria {
+  CARGA
+  DESCARGA
+  BITACORA
+  UNIDAD
+  TICKET
+}
+
+enum TicketEstado {
+  Pendiente
+  Parcial
+  Completo
+}
+
+enum PuntoTipo {
+  Ruta
+  Gasolinera
+  Pension
+  Comedor
+  Caseta
+  PermitStop
+}
+
+enum MetodoPeso {
+  Tirillas
+  CuentaLitros
+  Bascula
+  Otro
+}
+
+// ---------- Seguridad / Organización ----------
+model User {
+  id            String               @id @default(uuid())
+  email         String               @unique
+  nombre        String
+  rol           UserRole
+  estado        UserState            @default(Invitado)
+  googleSub     String?              @unique
+
+  // Relaciones
+  grupos        UserGroup[]
+  auditActor    AuditLog[]           @relation("AuditActor")
+  tripsOperados Trip[]               @relation("TripOperador")
+  cambiosDestino TripCambioDestino[] @relation("CambioUsuario")
+
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+}
+
+model Group {
+  id        String      @id @default(uuid())
+  nombre    String
+  tipo      String?
+  activo    Boolean     @default(true)
+  users     UserGroup[]
+  createdAt DateTime    @default(now())
+}
+
+model UserGroup {
+  userId String
+  groupId String
+  user   User  @relation(fields: [userId], references: [id])
+  group  Group @relation(fields: [groupId], references: [id])
+
+  @@id([userId, groupId])
+  @@index([groupId])
+  @@index([userId])
+}
+
+// ---------- Catálogos ----------
+model Cliente {
+  id        String     @id @default(uuid())
+  nombre    String
+  productos Producto[]
+  trips     Trip[]     // ← opuesto de Trip.cliente
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Producto {
+  id         String    @id @default(uuid())
+  clienteId  String
+  cliente    Cliente   @relation(fields: [clienteId], references: [id])
+  nombre     String
+  constantes Json?
+  trips      Trip[]    // ← opuesto de Trip.producto
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([clienteId])
+}
+
+model Ciudad {
+  id         String      @id @default(uuid())
+  nombre     String
+  estado     String?
+  pais       String?     @default("MX")
+  terminales Terminal[]
+  pl         PLEstacion[]
+}
+
+model Terminal {
+  id        String   @id @default(uuid())
+  ciudadId  String
+  ciudad    Ciudad   @relation(fields: [ciudadId], references: [id])
+  nombre    String
+  direccion String?
+  createdAt DateTime @default(now())
+
+  @@index([ciudadId])
+}
+
+model PLEstacion {
+  id        String   @id @default(uuid())
+  ciudadId  String
+  ciudad    Ciudad   @relation(fields: [ciudadId], references: [id])
+  nombre    String
+  direccion String?
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([ciudadId, activo])
+}
+
+// ---------- Unidades y documentos ----------
+model Unidad {
+  id        String   @id @default(uuid())
+  eco       String   @unique
+  placas    String?
+  tipo      String   // Tracto | Tanque | Dolly
+  extra     Json?
+  grupoId   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  documentos DocUnidad[]
+
+  // Relaciones opuestas
+  trips      Trip[]       @relation("TripUnidad")
+  mTracto    Mancuerna[]  @relation("MTracto")
+  mTanque1   Mancuerna[]  @relation("MTanque1")
+  mDolly     Mancuerna[]  @relation("MDolly")
+  mTanque2   Mancuerna[]  @relation("MTanque2")
+}
+
+model DocUnidad {
+  id           String   @id @default(uuid())
+  unidadId     String
+  unidad       Unidad   @relation(fields: [unidadId], references: [id])
+  tipo         DocTipo
+  numero       String?
+  emision      DateTime?
+  vencimiento  DateTime?
+  driveFileId  String?
+  webViewLink  String?
+  mimeType     String?
+  bytes        Int?
+  checksum     String?
+  createdAt    DateTime @default(now())
+
+  @@index([unidadId])
+  @@index([vencimiento])
+}
+
+// ---------- Mancuernas ----------
+model Mancuerna {
+  id         String  @id @default(uuid())
+  code       String  @unique
+  tractoId   String
+  tanque1Id  String?
+  dollyId    String?
+  tanque2Id  String?
+  disponible Boolean @default(true)
+  grupoId    String?
+  createdAt  DateTime @default(now())
+
+  tracto   Unidad  @relation("MTracto",  fields: [tractoId],  references: [id])
+  tanque1  Unidad? @relation("MTanque1", fields: [tanque1Id], references: [id])
+  dolly    Unidad? @relation("MDolly",   fields: [dollyId],   references: [id])
+  tanque2  Unidad? @relation("MTanque2", fields: [tanque2Id], references: [id])
+
+  trips    Trip[]   @relation("TripMancuerna") // ← opuesto de Trip.mancuerna
+
+  @@index([tractoId])
+  @@index([grupoId])
+}
+
+// ---------- Rutas y versionado ----------
+model Ruta {
+  id         String   @id @default(uuid())
+  nombre     String
+  origenId   String?
+  destinoId  String?
+  version    Int      @default(1)
+  activo     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  puntos     RutaPunto[]
+  casetas    RutaCaseta[]
+  paradas    RutaParada[]
+  versiones  RutaVersion[]
+  trips      Trip[]        // ← opuesto de Trip.ruta
+}
+
+model RutaVersion {
+  id         String   @id @default(uuid())
+  rutaId     String
+  ruta       Ruta     @relation(fields: [rutaId], references: [id])
+  version    Int
+  cambios    Json
+  nombre     String
+  origenId   String?
+  destinoId  String?
+  createdAt  DateTime  @default(now())
+
+  @@index([rutaId, version])
+}
+
+model RutaPunto {
+  id        String   @id @default(uuid())
+  rutaId    String
+  ruta      Ruta     @relation(fields: [rutaId], references: [id])
+  orden     Int
+  tipo      PuntoTipo
+  nombre    String?
+  lat       Float
+  lng       Float
+  tiempoMin Int?
+  createdAt DateTime @default(now())
+
+  @@index([rutaId, orden])
+  @@index([tipo])
+}
+
+model RutaCaseta {
+  id        String   @id @default(uuid())
+  rutaId    String
+  ruta      Ruta     @relation(fields: [rutaId], references: [id])
+  nombre    String
+  costo     Float    @default(0)
+  km        Float?
+  createdAt DateTime @default(now())
+
+  @@index([rutaId])
+}
+
+model RutaParada {
+  id        String   @id @default(uuid())
+  rutaId    String
+  ruta      Ruta     @relation(fields: [rutaId], references: [id])
+  tipo      PuntoTipo
+  nombre    String
+  lat       Float?
+  lng       Float?
+  tiempoMin Int?
+  createdAt DateTime @default(now())
+
+  @@index([rutaId])
+  @@index([tipo])
+}
+
+// ---------- Viajes ----------
+model Trip {
+  id            String     @id @default(uuid())
+  folio         String     @unique
+
+  clienteId     String?
+  cliente       Cliente?   @relation(fields: [clienteId], references: [id])
+
+  productoId    String?
+  producto      Producto?  @relation(fields: [productoId], references: [id])
+
+  operadorId    String?
+  operador      User?      @relation("TripOperador", fields: [operadorId], references: [id])
+
+  unidadId      String?
+  unidad        Unidad?    @relation("TripUnidad", fields: [unidadId], references: [id])
+
+  mancuernaId   String?
+  mancuerna     Mancuerna? @relation("TripMancuerna", fields: [mancuernaId], references: [id])
+
+  rutaId        String?
+  ruta          Ruta?      @relation(fields: [rutaId], references: [id])
+
+  tipo          TravelType
+  eta           DateTime?
+  estado        String      @default("Planeado")
+
+  origenId      String?
+  destinoId     String?
+  cambiosDestino TripCambioDestino[]
+
+  // tiempos
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // planeación
+  kmsPlan       Float?
+  tiempoPlanMin Int?
+  costoCasetas  Float?
+
+  // relaciones hijas
+  loads     LoadOp[]
+  unloads   UnloadOp[]
+  bitacoras Bitacora[]
+  gps       TripGPS[]
+
+  @@index([clienteId, estado])
+  @@index([rutaId])
+  @@index([operadorId])
+}
+
+model TripCambioDestino {
+  id        String   @id @default(uuid())
+  tripId    String
+  trip      Trip     @relation(fields: [tripId], references: [id])
+  usuarioId String?
+  usuario   User?    @relation("CambioUsuario", fields: [usuarioId], references: [id])
+  deNombre  String?
+  aNombre   String?
+  detalle   String?
+  createdAt DateTime @default(now())
+
+  @@index([tripId])
+}
+
+// ---------- Carga / Descarga ----------
+model LoadOp {
+  id          String   @id @default(uuid())
+  tripId      String
+  trip        Trip     @relation(fields: [tripId], references: [id])
+  lecturas    Json
+  variacion   Float?
+  flags       Json?
+  createdBy   String?
+  createdAt   DateTime @default(now())
+
+  @@index([tripId])
+  @@index([createdAt])
+}
+
+model UnloadOp {
+  id          String   @id @default(uuid())
+  tripId      String
+  trip        Trip     @relation(fields: [tripId], references: [id])
+  lecturas    Json
+  createdBy   String?
+  createdAt   DateTime @default(now())
+
+  @@index([tripId])
+  @@index([createdAt])
+}
+
+// ---------- Bitácora ----------
+model Bitacora {
+  id            String   @id @default(uuid())
+  tripId        String
+  trip          Trip     @relation(fields: [tripId], references: [id])
+  fechaHora     DateTime
+  anotacion     String
+  observaciones String?
+  kmsRecorridos Float?
+  casetas       Float?
+  desvio        String?
+  createdBy     String?
+  createdAt     DateTime @default(now())
+
+  @@index([tripId, fechaHora])
+}
+
+// ---------- Evidencias ----------
+model Evidence {
+  id           String            @id @default(uuid())
+  ownerType    OwnerType
+  ownerId      String
+  driveFileId  String
+  webViewLink  String
+  mimeType     String
+  bytes        Int
+  checksum     String?
+  categoria    EvidenceCategoria?
+  createdBy    String?
+  createdAt    DateTime          @default(now())
+
+  @@index([ownerType])
+  @@index([ownerId])
+  @@index([createdAt])
+}
+
+// ---------- Seguimiento GPS ----------
+model TripGPS {
+  id        String   @id @default(uuid())
+  tripId    String
+  trip      Trip     @relation(fields: [tripId], references: [id])
+  lat       Float
+  lng       Float
+  ts        DateTime
+  fuente    String?
+  createdAt DateTime @default(now())
+
+  @@index([tripId, ts])
+  @@index([ts])
+}
+
+// ---------- Parámetros ----------
+model Param {
+  id        String   @id @default(uuid())
+  scope     String
+  scopeId   String?
+  key       String
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([scope, scopeId, key])
+  @@unique([scope, scopeId, key], map: "param_scope_key_unique")
+}
+
+// ---------- Tickets ----------
+model Ticket {
+  id          String       @id @default(uuid())
+  folio       String       @unique
+  tipoUnidad  String
+  placas      String?
+  descripcion String
+  estado      TicketEstado @default(Pendiente)
+  fechas      Json?
+  costo       Float?
+  createdBy   String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+// ---------- Auditoría ----------
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorId   String?
+  actor     User?    @relation("AuditActor", fields: [actorId], references: [id])
+  evento    String
+  entity    String?
+  entityId  String?
+  diff      Json?
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([evento, createdAt])
+  @@index([entity, entityId])
+}

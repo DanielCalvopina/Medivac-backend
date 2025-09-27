@@ -14,6 +14,7 @@
     "prisma:gen": "prisma generate",
     "prisma:studio": "prisma studio",
     "swagger": "node ./src/docs/swagger.ts"
+    
   },
   "dependencies": {
     "@nestjs/common": "^10.4.5",
