@@ -1,8 +1,11 @@
+// src/trip/trip.service.ts
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.services";
 import { CreateTripDto } from "../common/dto/create-trip.dto";
 import { CreateLoadDto } from "../common/dto/create-load.dto";
 import { CreateUnloadDto } from "../common/dto/create-unload.dto";
+
+type ListParams = { q?: string; skip?: number; take?: number };
 
 @Injectable()
 export class TripService {
@@ -12,7 +15,7 @@ export class TripService {
     return this.prisma.trip.create({
       data: {
         folio: dto.folio,
-        tipo: dto.tipo, // <-- pasar el tipo requerido
+        tipo: dto.tipo,
         clienteId: dto.clienteId ?? null,
         productoId: dto.productoId ?? null,
       },
@@ -31,13 +34,61 @@ export class TripService {
     return trip;
   }
 
+  // NUEVO: listar viajes (opcional q = búsqueda parcial por folio)
+  async list(params: ListParams) {
+    const { q, skip = 0, take = 50 } = params;
+    const where = q
+      ? { folio: { contains: q, mode: "insensitive" as const } }
+      : undefined;
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.trip.findMany({
+        where,
+        orderBy: { folio: "asc" },
+        skip,
+        take,
+        select: {
+          id: true,
+          folio: true,
+          tipo: true,
+          clienteId: true,
+          productoId: true,
+        },
+      }),
+      this.prisma.trip.count({ where }),
+    ]);
+
+    return { items, total, skip, take };
+  }
+
+  // NUEVO: solo folios (ligero)
+  async listFolios(params: ListParams) {
+    const { q, skip = 0, take = 200 } = params;
+    const where = q
+      ? { folio: { contains: q, mode: "insensitive" as const } }
+      : undefined;
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.trip.findMany({
+        where,
+        orderBy: { folio: "asc" },
+        skip,
+        take,
+        select: { id: true, folio: true },
+      }),
+      this.prisma.trip.count({ where }),
+    ]);
+
+    return { items, total, skip, take };
+  }
+
   async addLoad(tripId: string, dto: CreateLoadDto) {
     await this.ensureTrip(tripId);
     return this.prisma.loadOp.create({
       data: {
         tripId,
-        lecturas: dto.lecturas,
-        createdBy: dto.createdBy ?? null,
+        lecturas: (dto as any).lecturas ?? dto, // por compatibilidad
+        createdBy: (dto as any).createdBy ?? null,
       } as any,
     });
   }
@@ -47,8 +98,8 @@ export class TripService {
     return this.prisma.unloadOp.create({
       data: {
         tripId,
-        lecturas: dto.lecturas,
-        createdBy: dto.createdBy ?? null,
+        lecturas: (dto as any).lecturas ?? dto,
+        createdBy: (dto as any).createdBy ?? null,
       } as any,
     });
   }

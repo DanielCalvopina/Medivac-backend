@@ -38,12 +38,52 @@ let TripService = class TripService {
             throw new common_1.NotFoundException("Trip no encontrado");
         return trip;
     }
+    async list(params) {
+        const { q, skip = 0, take = 50 } = params;
+        const where = q
+            ? { folio: { contains: q, mode: "insensitive" } }
+            : undefined;
+        const [items, total] = await this.prisma.$transaction([
+            this.prisma.trip.findMany({
+                where,
+                orderBy: { folio: "asc" },
+                skip,
+                take,
+                select: {
+                    id: true,
+                    folio: true,
+                    tipo: true,
+                    clienteId: true,
+                    productoId: true,
+                },
+            }),
+            this.prisma.trip.count({ where }),
+        ]);
+        return { items, total, skip, take };
+    }
+    async listFolios(params) {
+        const { q, skip = 0, take = 200 } = params;
+        const where = q
+            ? { folio: { contains: q, mode: "insensitive" } }
+            : undefined;
+        const [items, total] = await this.prisma.$transaction([
+            this.prisma.trip.findMany({
+                where,
+                orderBy: { folio: "asc" },
+                skip,
+                take,
+                select: { id: true, folio: true },
+            }),
+            this.prisma.trip.count({ where }),
+        ]);
+        return { items, total, skip, take };
+    }
     async addLoad(tripId, dto) {
         await this.ensureTrip(tripId);
         return this.prisma.loadOp.create({
             data: {
                 tripId,
-                lecturas: dto.lecturas,
+                lecturas: dto.lecturas ?? dto,
                 createdBy: dto.createdBy ?? null,
             },
         });
@@ -53,7 +93,7 @@ let TripService = class TripService {
         return this.prisma.unloadOp.create({
             data: {
                 tripId,
-                lecturas: dto.lecturas,
+                lecturas: dto.lecturas ?? dto,
                 createdBy: dto.createdBy ?? null,
             },
         });

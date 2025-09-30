@@ -28,10 +28,21 @@ let TripController = class TripController {
     get(id) {
         return this.trips.get(id);
     }
-    findByFolio(folio) {
-        if (!folio)
-            return [];
-        return this.trips.findByFolio(folio);
+    listOrFind(folio, q, skip = "0", take = "50") {
+        if (folio)
+            return this.trips.findByFolio(folio);
+        return this.trips.list({
+            q: q?.trim() || undefined,
+            skip: Number(skip) || 0,
+            take: Math.min(Number(take) || 50, 200),
+        });
+    }
+    listFolios(q, skip = "0", take = "200") {
+        return this.trips.listFolios({
+            q: q?.trim() || undefined,
+            skip: Number(skip) || 0,
+            take: Math.min(Number(take) || 200, 1000),
+        });
     }
     addLoad(tripId, dto) {
         return this.trips.addLoad(tripId, dto);
@@ -64,10 +75,22 @@ __decorate([
 __decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Query)("folio")),
+    __param(1, (0, common_1.Query)("q")),
+    __param(2, (0, common_1.Query)("skip")),
+    __param(3, (0, common_1.Query)("take")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String, Object, Object]),
     __metadata("design:returntype", void 0)
-], TripController.prototype, "findByFolio", null);
+], TripController.prototype, "listOrFind", null);
+__decorate([
+    (0, common_1.Get)("folios/all"),
+    __param(0, (0, common_1.Query)("q")),
+    __param(1, (0, common_1.Query)("skip")),
+    __param(2, (0, common_1.Query)("take")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", void 0)
+], TripController.prototype, "listFolios", null);
 __decorate([
     (0, common_1.Post)(":tripId/carga"),
     __param(0, (0, common_1.Param)("tripId")),
