@@ -5,7 +5,7 @@
     "removeComments": true,
     "declaration": false,
     "sourceMap": false,
-    "noEmit": false              // IMPORTANTE: sí emitimos en build
+    "noEmit": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test", "**/*.spec.ts"]

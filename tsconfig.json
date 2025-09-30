@@ -9,9 +9,15 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "incremental": true,
-    "noEmit": true,                 // en dev no emitimos
+    "noEmit": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+
+    // 👇 necesarios para Nest y class-validator (legacy decorators)
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    // 👇 evita que los @decorators de propiedades reciban 'undefined'
+    "useDefineForClassFields": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test", "**/*.spec.ts"]
