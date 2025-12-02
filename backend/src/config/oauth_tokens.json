@@ -1,0 +1,8 @@
+{
+  "access_token": "ya29.a0ATi6K2vZXnkSOdCMQc9NLj6oJVk6hW-oZNx6KEh5fYej-HFdKU-bGXnjes254Lf7sk8H7qm9XvPJgdIWtceVV7bgm9_0Cg75ZWtDq5qQPwdcNigM2TF87IGvIwhDpzKp5CQgz0q-oZgOJFvWeNP9pTdils8kF2BWNZR9dL4XQN5KOXWVZMQj1ywVBE43OVENFU72ppkaCgYKAcESARMSFQHGX2MiBYAU7wQWiAGXqM917KcwoQ0206",
+  "refresh_token": "1//05w7ON1FRyg0zCgYIARAAGAUSNwF-L9IrNTgXi-fPFg7_7zORM-yeb5Posuny1djlhfgjyhwmVx_-tszjQENlXlZooHZFOhUdiY8",
+  "scope": "https://www.googleapis.com/auth/drive.file",
+  "token_type": "Bearer",
+  "refresh_token_expires_in": 604799,
+  "expiry_date": 1763947332192
+}

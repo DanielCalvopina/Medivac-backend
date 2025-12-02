@@ -5,6 +5,6 @@
 
 para crear modales etc
 
-npx nest g service service/viaje --flat --no-spec
-npx nest g controller controller/viaje --flat --no-spec
-npx nest g module modules/viaje --flat
+npx nest g service service/files --flat --no-spec
+npx nest g controller controller/files --flat --no-spec
+npx nest g module modules/files --flat

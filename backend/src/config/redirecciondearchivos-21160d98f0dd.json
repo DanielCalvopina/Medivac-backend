@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "redirecciondearchivos",
+  "private_key_id": "21160d98f0dd72b0963d3ae3d8b29ec303e213f1",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCleYjNidUuSvhV\nDUa8Pdfm3sI8i87ti6iPotsD5dEoMAF1vcnsjct4Ft2CSUCVa3mUpqyTiHCZRc8Y\nmspF7Q4ks22WIrw3+EHmc+yij8x+eichlB5Q3y1E693LTm52XaNU36da6ginDIqt\nllT40gXFdFhodiuhNp2SbTsgLbL3+IXI5dmGguEsjnG5ZjFvAsRgqjYhZIlHpcyY\nqG2p8uLi8AGstzmmnH7yuXE1A+UXdkZQqJHhhS13JHzUfO7+G5rf5uPQAQDnNAxx\n4yifdsGDvyLZKxnAfmNKa8tWiHW/QdFbqBJzBaKsD4qTLHQbm2jOV1I2WYEi2iP+\nwBAaI+3nAgMBAAECggEAHALky5Znhfye6RbkQH1fjO9shf9Muh2IHTh+RryimWD2\n/k1wXyDprpyARsvLqP+WhzlnwVm5ZdjRY+LgFtI4MLJG/MFIh1j5Ht/E0Qfyn/5h\nnWeLcjk1WpNq6j2OqW7UdUue8t7nNBAFcbkfDTfQTkqRpK1MWW/7YIwpFBtoTl13\nm6/dNVA3UdTnyEI8suPxu5X+vw2bXQ5wXvTPYuXAolOFiO+X5jwdZ27Ru8ywJUrW\ns1SYvdZfu3dSlQANxuEO8ZUteBrPCWuk2b/Kwb35mni129V2w/4NMlwPdDn8SZsM\nrijieGkCRb+gDp8t/PqcvAzkmUV2TSYUnup/hoVJMQKBgQDh9cw/FjrBEAgcmnvU\np8hQXrj/26+Qy5VlG6/poBI/fiBIc1QGntujkdm0/fGE+Oqi3llx06RwseOzzRz0\n6qcIyMjnMjKXQGVZ9t86Ms8es0cFDIbnOhcrby/uxxUTb8yAD/3niEVqlSK7KCsx\nLtmKlT4qV4L2Hh+AiH7yeU5flQKBgQC7eTW8GgnmMNN1uQNyTgVRosj16duuiQl+\nq4KLtNdHyDec4Hl4lXujf/mBujkwlYvej+h7yuMOC9cBgqE3b3YZBXA/96fxSMgv\nApemNXD2SpPkSFeGzzXykvp4RHfZTBrDNvPy3BY6nEICdJNoZVYQ1eHOPcT4JtNt\nTcEJTFvoiwKBgQCggbJBCfBYXaP1dYMKztgKxw5QqOOwTfzkImO153+u3E/gRxPj\n1AoeyabE2zIpi4tYf+s3YOhJKQOfH8825kwagE29dLndGOAlpKhytc7Mdvq2ymw1\nad01fDinO4FsGhlAyptIUVNF34QZP/JWcHoU5+iNuTYMz97+tXa/lI2odQKBgH3L\nNFI2SqQp6QoaDgT58zm2+A+CTwULMNLNNLiXrMiewSpDuV4/N4obCgmRMmS2Q/cg\nKwg9uCMpsKhzxceTw/PAIXTasdcGVkStAaLmQxkQK7JHFGwByBovo19l2eF13pNU\n4VX5dfT3+pb5MBwhuyFq0qx36B32t3GldbzOfvFHAoGBAMvS4pSjZ64rBDjyiK8v\n23kLGGYGiLPMM3w3VUxdAai+zwEK8jQUGGRPlW5yQhJxi/GpToQTsIgc4MgYTFyV\ngp2cAGNj0xXgzJJcXZY0u4OLmtdxpRc2XiN7ZMvCxoMGMejfcyKweMDF0/PC+2az\nt6Z2ckCE8AI+BZbEJp7gjw4M\n-----END PRIVATE KEY-----\n",
+  "client_email": "medivac-backend-service@redirecciondearchivos.iam.gserviceaccount.com",
+  "client_id": "116730027882292796947",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/medivac-backend-service%40redirecciondearchivos.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

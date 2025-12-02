@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "apibackmadivac",
+  "private_key_id": "504445a51e770804aa629138f0c989865c4ca405",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDKi9kWvHwAUoip\noIWkpt7z/pt1cHJZA75NNr8eh+aoW2g+IGM7FCNJxZE4dUZYmOl/UfG3fr0KUTRI\nA3po5SvfTWKhG0SHz3FTxUaZGWAIK5+cK+e+EHkjsgZRa6CdPxnmWxuc3yAIpZz6\nBfnn+9WOzjuejW6OqOE4rh0XxTSXut4n6UYvRatcxI/L7Dzv2qzHLBGqxFhP4XP1\ny4DIsukU1venI4AI6lcr04AO9cPd7un7c0eslyBpbEpIndGQM90cfUmL6XEQxEuV\nF7O0pkkchf9CodYCA6f97SlwporHGrB87aW9qjeCMXd5RQbfLnSqFPSt0PsaT70k\n6I/qHFPXAgMBAAECggEAIRHN5c3sCwYZWmSjMqZXeYvk6Drt7dr+xk7oIRJ8QO78\n/pkSyocNBJL1amaPZTtrctu3X50ZkqZ+fDwrz2uMtbPwpLA13gdVuqEs19Cnor3d\n8fAjMUoxlSKQWy57i0ujAr7Lq9msOm0xIOCP6btEJhbwRKtVKoVSkbVaelKQNdjE\nqt+PRD0zN9HcoGZNU7MZXOA2z02i3H6ajMpBZnDMN6B3vIVv/n/vubBVp6V3Hv6F\nnhgk5ce/Jc6CEdK/SUbMkka5hWKsBn6FnMzxJXPaIJQGfF3wQnOlSV+l23UWIG4T\nE4LrzdhFP9d/r1jhl56EaKYGl3fgIlagJVJ2GQxu9QKBgQD2w5qfF7t/hlPvzQDD\na1Nm/14ERAEdElT66bh6h/CthW3Nv23yGJXp7aoraBzR6mPEaT2ZL2XgxxRbFR0+\nlxqLdO2HYmOQ4xETk5plbpZgsBwdd9gErHRjZqsBnC88SO0xSMqx/Tvq4f5s3I/X\nlC2OFSlDnig6XA/BjQz2gdVaowKBgQDSIJEIakXPm1oCYWmGfi6fGsQ5ByoGTbTx\n1ZkbVH743Aeb/ryYkSFkwy+sq/jzP4yludGq+1tPaUyFbOkMIMKihdMMSGOuZRbH\njynJC+/NhYsDLYk5vKl/9Ljy7vzz7tK3xJhLye9qYbKdu9kuXzKNVoi/pcK0du+I\nJiX6xPIJPQKBgQCCyFy0oPFgvyLRX0deSw2i8wkzHY+xhru/WAvL9Sxb6vGtMB3n\nR5x8pNehtcZAgwdpW5WoEHTgUuK4+1HKkG8jJk+Vh1HZwl6Uj5Au3hOZHv1nqNK2\nd2ggHpPXgJ2QR95eVoQHHX2aGTitHaCm0wPp39FE4xfTBmPbYxRRubIIHQKBgCzC\nUyJ/wK8gYGPxbBEB/9xUT0f2hrUhCFIbNankrcdE1zobYQD+qSZVjWoyl6z49HS4\nyDiroh+gRnSFZn72237TEsmjAdi8H8YScMwqhsI4mAvtPzXVQiXHcz4MOkWbsbcD\nYY2DTkRS20FOKkz+aj5BGI/6NydJzmwp9B0epo/hAoGBAJSz9+sbZv4SqJFh0RDZ\nP42ErcHT9ANrQSkw+Ea8Qx1VavCh3jvnTsoEcI9RDEL2mVdeZNvLed2muSqb6rg/\nE/dpDeF/6nkmOA/lXXE9g7atExE30MA5GEyjaoqljl+MkgYSB9VSHC2qIiRS/ds3\nRS2hvbcOJ+wqnE2RcD0+GXPs\n-----END PRIVATE KEY-----\n",
+  "client_email": "medivac-backend-drive-448@apibackmadivac.iam.gserviceaccount.com",
+  "client_id": "101255528309071697234",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/medivac-backend-drive-448%40apibackmadivac.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
