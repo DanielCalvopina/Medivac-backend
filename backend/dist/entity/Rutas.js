@@ -16,6 +16,7 @@ let Rutas = class Rutas {
     etnsId2;
     rtsNombre;
     rtsDesc;
+    rtsMpas;
     rtsOrigen;
     rtsDestino;
     status;
@@ -37,6 +38,10 @@ __decorate([
     (0, typeorm_1.Column)("character varying", { name: "rts_desc", length: 60 }),
     __metadata("design:type", String)
 ], Rutas.prototype, "rtsDesc", void 0);
+__decorate([
+    (0, typeorm_1.Column)("character varying", { name: "rts_mpas", length: 552 }),
+    __metadata("design:type", Object)
+], Rutas.prototype, "rtsMpas", void 0);
 __decorate([
     (0, typeorm_1.Column)("character varying", { name: "rts_origen", length: 260 }),
     __metadata("design:type", String)

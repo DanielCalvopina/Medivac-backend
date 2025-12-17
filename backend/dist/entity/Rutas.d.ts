@@ -3,6 +3,7 @@ export declare class Rutas {
     etnsId2: number;
     rtsNombre: string;
     rtsDesc: string;
+    rtsMpas: string | null;
     rtsOrigen: string;
     rtsDestino: string;
     status: boolean;

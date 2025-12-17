@@ -19,6 +19,9 @@ export class Rutas {
 
   @Column("character varying", { name: "rts_desc", length: 60 })
   rtsDesc: string;
+  
+  @Column("character varying", { name: "rts_mpas", length: 552})
+  rtsMpas: string | null;
 
   @Column("character varying", { name: "rts_origen", length: 260 })
   rtsOrigen: string;
