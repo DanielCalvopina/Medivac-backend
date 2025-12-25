@@ -1,14 +1,14 @@
 import {
   Column,
   Entity,
-  Index,
   OneToMany,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
 } from "typeorm";
 import { Folio } from "./Folio";
 
-@Index("pk_producto", ["prdId"], { unique: true })
-@Index("producto_pk", ["prdId"], { unique: true })
 @Entity("producto", { schema: "public" })
 export class Producto {
   @PrimaryGeneratedColumn({ type: "integer", name: "prd_id" })
@@ -20,23 +20,25 @@ export class Producto {
   @Column("character varying", { name: "prd_desc", length: 255 })
   prdDesc: string;
 
+  // Usamos 'double precision' para números decimales exactos en PG
   @Column("double precision", { name: "prd_max", precision: 53 })
   prdMax: number;
 
   @Column("double precision", { name: "prd_min", precision: 53 })
   prdMin: number;
 
-  @Column("boolean", { name: "status" })
+  @Column("boolean", { name: "status", default: true })
   status: boolean;
 
-  @Column("date", { name: "created_at" })
-  createdAt: string;
+  // --- AUTOMATIZACIÓN DE FECHAS ---
+  @CreateDateColumn({ name: "created_at", type: 'date' })
+  createdAt: Date;
 
-  @Column("date", { name: "updated_at", nullable: true })
-  updatedAt: string | null;
+  @UpdateDateColumn({ name: "updated_at", type: 'date', nullable: true })
+  updatedAt: Date | null;
 
-  @Column("date", { name: "deleted_at", nullable: true })
-  deletedAt: string | null;
+  @DeleteDateColumn({ name: "deleted_at", type: 'date', nullable: true })
+  deletedAt: Date | null;
 
   @OneToMany(() => Folio, (folio) => folio.prd)
   folios: Folio[];

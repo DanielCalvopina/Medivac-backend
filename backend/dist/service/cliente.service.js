@@ -22,39 +22,60 @@ let ClienteService = class ClienteService {
     constructor(repo) {
         this.repo = repo;
     }
-    findAll() {
-        return this.repo.find();
+    toResponseDto(entity) {
+        return { ...entity };
+    }
+    async findAll() {
+        const list = await this.repo.find({ order: { createdAt: 'DESC' } });
+        return list.map((item) => this.toResponseDto(item));
     }
     async findOne(cliId) {
         const cliente = await this.repo.findOne({ where: { cliId } });
         if (!cliente)
-            throw new common_1.NotFoundException('Cliente no encontrado');
-        return cliente;
+            throw new common_1.NotFoundException(`Cliente con ID ${cliId} no encontrado`);
+        return this.toResponseDto(cliente);
     }
-    async create(data) {
-        if (data.status === undefined || data.status === null) {
-            data.status = true;
-        }
-        const now = new Date().toISOString().split('T')[0];
-        const nuevo = this.repo.create({
-            ...data,
-            createdAt: now,
-            updatedAt: now,
+    async create(dto) {
+        const existe = await this.repo.findOne({
+            where: [
+                { cliRuc: dto.cliRuc },
+                { cliCorreo: dto.cliCorreo }
+            ],
+            withDeleted: true
         });
-        return await this.repo.save(nuevo);
+        if (existe) {
+            throw new common_1.ConflictException('Ya existe un cliente con ese RUC o Correo.');
+        }
+        const entity = this.repo.create({
+            ...dto,
+            status: dto.status ?? true
+        });
+        const saved = await this.repo.save(entity);
+        return this.toResponseDto(saved);
     }
-    async update(cliId, data) {
-        const cliente = await this.findOne(cliId);
+    async update(cliId, dto) {
+        const cliente = await this.repo.preload({
+            cliId,
+            ...dto,
+        });
         if (!cliente)
-            throw new common_1.NotFoundException('Cliente no encontrado');
-        const now = new Date().toISOString().split('T')[0];
-        await this.repo.update(cliId, { ...data, updatedAt: now });
-        return this.findOne(cliId);
+            throw new common_1.NotFoundException(`Cliente con ID ${cliId} no encontrado`);
+        const saved = await this.repo.save(cliente);
+        return this.toResponseDto(saved);
+    }
+    async toggleStatus(cliId) {
+        const cliente = await this.repo.findOne({ where: { cliId } });
+        if (!cliente)
+            throw new common_1.NotFoundException(`Cliente con ID ${cliId} no encontrado`);
+        cliente.status = !cliente.status;
+        const saved = await this.repo.save(cliente);
+        return this.toResponseDto(saved);
     }
     async remove(cliId) {
-        const res = await this.repo.delete(cliId);
-        if (!res.affected)
-            throw new common_1.NotFoundException('Cliente no encontrado');
+        const res = await this.repo.softDelete(cliId);
+        if (res.affected === 0) {
+            throw new common_1.NotFoundException(`Cliente con ID ${cliId} no encontrado`);
+        }
         return { deleted: true };
     }
 };

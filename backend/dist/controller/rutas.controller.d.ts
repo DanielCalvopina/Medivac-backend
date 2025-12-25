@@ -1,12 +1,12 @@
-import { RutasService } from 'src/service/rutas.service';
+import { RutasService } from '../service/rutas.service';
+import { CreateRutasDto, UpdateRutasDto, RutasResponseDto } from '../dto/rutas.dto';
 export declare class RutasController {
     private readonly rutasService;
     constructor(rutasService: RutasService);
-    create(data: any): Promise<import("../entity/Rutas").Rutas>;
-    findAll(): Promise<import("../entity/Rutas").Rutas[]>;
-    findOne(id: number): Promise<import("../entity/Rutas").Rutas>;
-    update(id: number, data: any): Promise<import("../entity/Rutas").Rutas>;
-    remove(id: number): Promise<{
-        deleted: boolean;
-    }>;
+    findAll(): Promise<RutasResponseDto[]>;
+    findOne(id: number): Promise<RutasResponseDto>;
+    create(data: CreateRutasDto): Promise<RutasResponseDto>;
+    update(id: number, data: UpdateRutasDto): Promise<RutasResponseDto>;
+    toggleStatus(id: number): Promise<RutasResponseDto>;
+    remove(id: number): Promise<void>;
 }

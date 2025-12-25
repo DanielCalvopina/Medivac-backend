@@ -1,13 +1,14 @@
-import { FolioService } from 'src/service/folio.service';
+import { FolioService } from '../service/folio.service';
+import { CreateFolioDto, UpdateFolioDto, FolioItemDto, FolioItemsDto } from '../dto/folio.dto';
 export declare class FolioController {
-    private readonly folioService;
-    constructor(folioService: FolioService);
-    create(data: any): Promise<import("../entity/Folio").Folio>;
-    getByViaje(viajeId: number): Promise<import("../entity/Folio").Folio[]>;
-    findAll(): Promise<import("../entity/Folio").Folio[]>;
-    findOne(id: number): Promise<import("../entity/Folio").Folio>;
-    update(id: number, data: any): Promise<import("../entity/Folio").Folio>;
+    private readonly svc;
+    constructor(svc: FolioService);
+    findAll(): Promise<FolioItemsDto>;
+    findOne(id: number): Promise<FolioItemDto>;
+    getByViaje(viajeId: number): Promise<FolioItemsDto>;
+    create(body: CreateFolioDto): Promise<FolioItemDto>;
+    update(id: number, body: UpdateFolioDto): Promise<FolioItemDto>;
     remove(id: number): Promise<{
-        message: string;
+        deleted: true;
     }>;
 }

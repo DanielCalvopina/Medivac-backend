@@ -32,7 +32,7 @@ let Dolly = class Dolly {
 };
 exports.Dolly = Dolly;
 __decorate([
-    (0, typeorm_1.Column)("character varying", { primary: true, name: "dolly_id", length: 30 }),
+    (0, typeorm_1.PrimaryColumn)("character varying", { name: "dolly_id", length: 30 }),
     __metadata("design:type", String)
 ], Dolly.prototype, "dollyId", void 0);
 __decorate([
@@ -60,27 +60,27 @@ __decorate([
     __metadata("design:type", String)
 ], Dolly.prototype, "dollyDesc", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "dolly_poliza_seguro", length: 60, nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.Column)("character varying", { name: "dolly_poliza_seguro", length: 60 }),
+    __metadata("design:type", String)
 ], Dolly.prototype, "dollyPolizaSeguro", void 0);
 __decorate([
-    (0, typeorm_1.Column)("timestamp", { name: "dolly_exp_poliza", nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.Column)("date", { name: "dolly_exp_poliza" }),
+    __metadata("design:type", String)
 ], Dolly.prototype, "dollyExpPoliza", void 0);
 __decorate([
-    (0, typeorm_1.Column)("integer", { name: "status" }),
+    (0, typeorm_1.Column)("integer", { name: "status", default: 1 }),
     __metadata("design:type", Number)
 ], Dolly.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "created_at" }),
-    __metadata("design:type", String)
+    (0, typeorm_1.CreateDateColumn)({ name: "created_at", type: "date" }),
+    __metadata("design:type", Date)
 ], Dolly.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "updated_at", nullable: true }),
+    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", type: "date", nullable: true }),
     __metadata("design:type", Object)
 ], Dolly.prototype, "updatedAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "deleted_at", nullable: true }),
+    (0, typeorm_1.DeleteDateColumn)({ name: "deleted_at", type: "date", nullable: true }),
     __metadata("design:type", Object)
 ], Dolly.prototype, "deletedAt", void 0);
 __decorate([
@@ -92,8 +92,6 @@ __decorate([
     __metadata("design:type", Array)
 ], Dolly.prototype, "mancuernas", void 0);
 exports.Dolly = Dolly = __decorate([
-    (0, typeorm_1.Index)("pk_dolly", ["dollyId"], { unique: true }),
-    (0, typeorm_1.Index)("dolly_pk", ["dollyId"], { unique: true }),
     (0, typeorm_1.Entity)("dolly", { schema: "public" })
 ], Dolly);
 //# sourceMappingURL=Dolly.js.map

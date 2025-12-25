@@ -11,12 +11,11 @@ export declare class Folio {
     folCod: string;
     folName: string;
     folDesc: string;
-    folOv: string;
     status: boolean;
-    createdAt: string | null;
-    updatedAt: string | null;
-    deletedAt: string | null;
     tnqNumse: string;
+    createdAt: Date;
+    updatedAt: Date | null;
+    deletedAt: Date | null;
     cargas: Carga[];
     descargas: Descarga[];
     docFolios: DocFolio[];

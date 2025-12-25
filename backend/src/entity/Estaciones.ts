@@ -1,57 +1,53 @@
 import {
   Column,
   Entity,
-  Index,
   OneToMany,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
 } from "typeorm";
 import { EstacionesFolio } from "./EstacionesFolio";
 import { EtnsCli } from "./EtnsCli";
 
-@Index("estaciones_pk", ["etnsId"], { unique: true })
-@Index("pk_estaciones", ["etnsId"], { unique: true })
 @Entity("estaciones", { schema: "public" })
 export class Estaciones {
   @PrimaryGeneratedColumn({ type: "integer", name: "etns_id" })
   etnsId: number;
 
-  @Column("character varying", { name: "etns_num_pl", length: 60 })
+  @Column("character varying", { name: "etns_num_pl", length: 255 })
   etnsNumPl: string;
 
-  @Column("character varying", { name: "erns_nombre", length: 60 })
+  // Mantenemos el nombre de columna tal cual lo tienes en BD (erns_nombre)
+  @Column("character varying", { name: "erns_nombre", length: 255 })
   ernsNombre: string;
 
-  @Column("character varying", { name: "etns_nombre_corto", length: 60 })
+  @Column("character varying", { name: "etns_nombre_corto", length: 255 })
   etnsNombreCorto: string;
 
-  @Column("character varying", { name: "etns_direccion", length: 300 })
+  @Column("character varying", { name: "etns_direccion", length: 1050 })
   etnsDireccion: string;
 
-  @Column("character varying", { name: "etns_ubicacion", length: 60 })
+  @Column("character varying", { name: "etns_ubicacion", length: 255 })
   etnsUbicacion: string;
 
-  @Column("character varying", { name: "etns_tipo", length: 60 })
-  etnsTipo: string;
-
-  @Column("character varying", {
-    name: "etns_ciudad",
-    nullable: true,
-    length: 60,
-  })
+  @Column("character varying", { name: "etns_ciudad", nullable: true, length: 255 })
   etnsCiudad: string | null;
 
-  @Column("boolean", { name: "status", nullable: true })
-  status: boolean | null;
+  @Column("boolean", { name: "status", default: true })
+  status: boolean;
 
-  @Column("date", { name: "created_at", nullable: true })
-  createdAt: string | null;
+  // --- FECHAS AUTOMÁTICAS ---
+  @CreateDateColumn({ name: "created_at", type: 'date' })
+  createdAt: Date;
 
-  @Column("date", { name: "updated_at", nullable: true })
-  updatedAt: string | null;
+  @UpdateDateColumn({ name: "updated_at", type: 'date', nullable: true })
+  updatedAt: Date | null;
 
-  @Column("date", { name: "deleted_at", nullable: true })
-  deletedAt: string | null;
+  @DeleteDateColumn({ name: "deleted_at", type: 'date', nullable: true })
+  deletedAt: Date | null;
 
+  // --- RELACIONES RESTAURADAS ---
   @OneToMany(() => EstacionesFolio, (estacionesFolio) => estacionesFolio.etns)
   estacionesFolios: EstacionesFolio[];
 

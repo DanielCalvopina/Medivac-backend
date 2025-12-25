@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OperadorController = void 0;
 const common_1 = require("@nestjs/common");
 const operador_service_1 = require("../service/operador.service");
+const operador_dto_1 = require("../dto/operador.dto");
 let OperadorController = class OperadorController {
     service;
     constructor(service) {
@@ -32,8 +33,11 @@ let OperadorController = class OperadorController {
     update(opCed, body) {
         return this.service.update(opCed, body);
     }
-    remove(opCed) {
-        return this.service.remove(opCed);
+    toggleStatus(opCed) {
+        return this.service.toggleStatus(opCed);
+    }
+    async remove(opCed) {
+        await this.service.remove(opCed);
     }
 };
 exports.OperadorController = OperadorController;
@@ -41,36 +45,44 @@ __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], OperadorController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':opCed'),
     __param(0, (0, common_1.Param)('opCed')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], OperadorController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [operador_dto_1.CreateOperadorDto]),
+    __metadata("design:returntype", Promise)
 ], OperadorController.prototype, "create", null);
 __decorate([
     (0, common_1.Patch)(':opCed'),
     __param(0, (0, common_1.Param)('opCed')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, operador_dto_1.UpdateOperadorDto]),
+    __metadata("design:returntype", Promise)
 ], OperadorController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)(':opCed'),
+    (0, common_1.Patch)(':opCed/toggle-status'),
     __param(0, (0, common_1.Param)('opCed')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
+], OperadorController.prototype, "toggleStatus", null);
+__decorate([
+    (0, common_1.Delete)(':opCed'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
+    __param(0, (0, common_1.Param)('opCed')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
 ], OperadorController.prototype, "remove", null);
 exports.OperadorController = OperadorController = __decorate([
     (0, common_1.Controller)('operador'),

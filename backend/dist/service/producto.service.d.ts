@@ -1,14 +1,16 @@
 import { Repository } from 'typeorm';
-import { Producto } from 'src/entity/Producto';
+import { Producto } from '../entity/Producto';
+import { CreateProductoDto, UpdateProductoDto, ProductoResponseDto } from '../dto/producto.dto';
 export declare class ProductoService {
     private readonly productoRepo;
     constructor(productoRepo: Repository<Producto>);
-    private today;
-    create(data: any): Promise<Producto[]>;
-    findAll(): Promise<Producto[]>;
-    findOne(id: number): Promise<Producto>;
-    update(id: number, data: any): Promise<Producto>;
+    private toResponseDto;
+    findAll(): Promise<ProductoResponseDto[]>;
+    findOne(id: number): Promise<ProductoResponseDto>;
+    create(dto: CreateProductoDto): Promise<ProductoResponseDto>;
+    update(id: number, dto: UpdateProductoDto): Promise<ProductoResponseDto>;
+    toggleStatus(id: number): Promise<ProductoResponseDto>;
     remove(id: number): Promise<{
-        message: string;
+        deleted: true;
     }>;
 }

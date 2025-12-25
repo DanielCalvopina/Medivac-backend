@@ -88,5 +88,5 @@ export declare class FilesService {
         createdAt: string;
         updatedAt: string;
     } & DocDolly)>;
-    getDocs(entity: string, id: string): Promise<DocTracto[] | DocTanque[] | DocDolly[] | DocOp[] | DocViaje[] | DocCarga[] | DocDescarga[] | DocFolio[]>;
+    getDocs(entity: string, id: string): Promise<DocTracto[] | DocOp[] | DocTanque[] | DocDolly[] | DocViaje[] | DocCarga[] | DocDescarga[] | DocFolio[]>;
 }

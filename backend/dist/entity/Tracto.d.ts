@@ -16,12 +16,12 @@ export declare class Tracto {
     trPermisoSct: string;
     trPeso: string;
     trDesc: string;
-    trPolizaSeguro: string | null;
-    trExpPoliza: Date | null;
+    trPolizaSeguro: string;
+    trExpPolizaSeguro: string;
     status: number;
-    createdAt: string;
-    updatedAt: string | null;
-    deletedAt: string | null;
+    createdAt: Date;
+    updatedAt: Date | null;
+    deletedAt: Date | null;
     docTractos: DocTracto[];
     mancuernas: Mancuerna[];
 }

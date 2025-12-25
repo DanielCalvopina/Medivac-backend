@@ -16,6 +16,13 @@ const DocDescarga_1 = require("./DocDescarga");
 let Descarga = class Descarga {
     descargaId;
     folId;
+    descargaFechEntrega;
+    descargaBole;
+    descargaDensidad;
+    descargaTemperatura;
+    createdAt;
+    updatedAt;
+    deletedAt;
     fol;
     docDescargas;
 };
@@ -25,9 +32,49 @@ __decorate([
     __metadata("design:type", Number)
 ], Descarga.prototype, "descargaId", void 0);
 __decorate([
-    (0, typeorm_1.Column)("integer", { name: "fol_id", nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.Column)("integer", { name: "fol_id" }),
+    __metadata("design:type", Number)
 ], Descarga.prototype, "folId", void 0);
+__decorate([
+    (0, typeorm_1.Column)("date", { name: "descarga_fech_entrega", nullable: true }),
+    __metadata("design:type", Object)
+], Descarga.prototype, "descargaFechEntrega", void 0);
+__decorate([
+    (0, typeorm_1.Column)("character varying", {
+        name: "descarga_bole",
+        nullable: true,
+        length: 255,
+    }),
+    __metadata("design:type", Object)
+], Descarga.prototype, "descargaBole", void 0);
+__decorate([
+    (0, typeorm_1.Column)("character varying", {
+        name: "descarga_densidad",
+        nullable: true,
+        length: 255,
+    }),
+    __metadata("design:type", Object)
+], Descarga.prototype, "descargaDensidad", void 0);
+__decorate([
+    (0, typeorm_1.Column)("character varying", {
+        name: "descarga_temperatura",
+        nullable: true,
+        length: 255,
+    }),
+    __metadata("design:type", Object)
+], Descarga.prototype, "descargaTemperatura", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)({ name: "created_at" }),
+    __metadata("design:type", Date)
+], Descarga.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", nullable: true }),
+    __metadata("design:type", Object)
+], Descarga.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)({ name: "deleted_at", nullable: true }),
+    __metadata("design:type", Object)
+], Descarga.prototype, "deletedAt", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => Folio_1.Folio, (folio) => folio.descargas, {
         onDelete: "RESTRICT",
@@ -41,9 +88,6 @@ __decorate([
     __metadata("design:type", Array)
 ], Descarga.prototype, "docDescargas", void 0);
 exports.Descarga = Descarga = __decorate([
-    (0, typeorm_1.Index)("pk_descarga", ["descargaId"], { unique: true }),
-    (0, typeorm_1.Index)("descarga_pk", ["descargaId"], { unique: true }),
-    (0, typeorm_1.Index)("relationship_33_fk", ["folId"], {}),
     (0, typeorm_1.Entity)("descarga", { schema: "public" })
 ], Descarga);
 //# sourceMappingURL=Descarga.js.map

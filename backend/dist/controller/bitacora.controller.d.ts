@@ -1,13 +1,14 @@
-import { BitacoraService } from 'src/service/bitacora.service';
+import { BitacoraService } from '../service/bitacora.service';
+import { CreateBitacoraDto, UpdateBitacoraDto, BitacoraItemDto, BitacoraItemsDto } from '../dto/bitacora.dto';
 export declare class BitacoraController {
-    private readonly bitacoraService;
-    constructor(bitacoraService: BitacoraService);
-    create(data: any): Promise<import("../entity/Bitacora").Bitacora[]>;
-    findAll(): Promise<import("../entity/Bitacora").Bitacora[]>;
-    findOne(id: number): Promise<import("../entity/Bitacora").Bitacora>;
-    findByViaje(viajeId: number): Promise<import("../entity/Bitacora").Bitacora[]>;
-    update(id: number, data: any): Promise<import("../entity/Bitacora").Bitacora>;
+    private readonly svc;
+    constructor(svc: BitacoraService);
+    findAll(): Promise<BitacoraItemsDto>;
+    findOne(id: number): Promise<BitacoraItemDto>;
+    findByViaje(viajeId: number): Promise<BitacoraItemsDto>;
+    create(body: CreateBitacoraDto): Promise<BitacoraItemDto>;
+    update(id: number, body: UpdateBitacoraDto): Promise<BitacoraItemDto>;
     remove(id: number): Promise<{
-        message: string;
+        deleted: true;
     }>;
 }

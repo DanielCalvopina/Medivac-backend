@@ -70,8 +70,8 @@ __decorate([
     __metadata("design:type", Viaje_1.Viaje)
 ], DocViaje.prototype, "viaje", void 0);
 exports.DocViaje = DocViaje = __decorate([
-    (0, typeorm_1.Index)("pk_doc_viaje", ["docViajeId"], { unique: true }),
     (0, typeorm_1.Index)("doc_folio_pk", ["docViajeId"], { unique: true }),
+    (0, typeorm_1.Index)("pk_doc_viaje", ["docViajeId"], { unique: true }),
     (0, typeorm_1.Index)("relationship_20_fk", ["viajeId"], {}),
     (0, typeorm_1.Entity)("doc_viaje", { schema: "public" })
 ], DocViaje);

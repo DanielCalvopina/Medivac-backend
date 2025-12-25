@@ -8,8 +8,8 @@ import {
 } from "typeorm";
 import { Tracto } from "./Tracto";
 
-@Index("pk_doc_tracto", ["docTractoId"], { unique: true })
 @Index("doc_tracto_pk", ["docTractoId"], { unique: true })
+@Index("pk_doc_tracto", ["docTractoId"], { unique: true })
 @Index("relationship_37_fk", ["trPlc"], {})
 @Entity("doc_tracto", { schema: "public" })
 export class DocTracto {

@@ -15,69 +15,70 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FolioController = void 0;
 const common_1 = require("@nestjs/common");
 const folio_service_1 = require("../service/folio.service");
+const folio_dto_1 = require("../dto/folio.dto");
 let FolioController = class FolioController {
-    folioService;
-    constructor(folioService) {
-        this.folioService = folioService;
+    svc;
+    constructor(svc) {
+        this.svc = svc;
     }
-    async create(data) {
-        return await this.folioService.create(data);
+    findAll() {
+        return this.svc.findAll();
     }
-    async getByViaje(viajeId) {
-        return await this.folioService.findByViaje(viajeId);
+    findOne(id) {
+        return this.svc.findOne(id);
     }
-    async findAll() {
-        return await this.folioService.findAll();
+    getByViaje(viajeId) {
+        return this.svc.findByViaje(viajeId);
     }
-    async findOne(id) {
-        return await this.folioService.findOne(id);
+    create(body) {
+        return this.svc.create(body);
     }
-    async update(id, data) {
-        return await this.folioService.update(id, data);
+    update(id, body) {
+        return this.svc.update(id, body);
     }
-    async remove(id) {
-        return await this.folioService.remove(id);
+    remove(id) {
+        return this.svc.remove(id);
     }
 };
 exports.FolioController = FolioController;
 __decorate([
-    (0, common_1.Post)('create'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], FolioController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)("viaje/:viajeId"),
-    __param(0, (0, common_1.Param)("viajeId")),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
-    __metadata("design:returntype", Promise)
-], FolioController.prototype, "getByViaje", null);
-__decorate([
-    (0, common_1.Get)('list'),
+    (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], FolioController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], FolioController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Put)('update/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)('viaje/:viajeId'),
+    __param(0, (0, common_1.Param)('viajeId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], FolioController.prototype, "getByViaje", null);
+__decorate([
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [folio_dto_1.CreateFolioDto]),
+    __metadata("design:returntype", Promise)
+], FolioController.prototype, "create", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:paramtypes", [Number, folio_dto_1.UpdateFolioDto]),
     __metadata("design:returntype", Promise)
 ], FolioController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)('delete/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)

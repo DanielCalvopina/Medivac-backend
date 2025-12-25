@@ -9,9 +9,9 @@ export declare class Cliente {
     cliNum: string;
     cliRuc: string;
     status: boolean;
-    createdAt: string;
-    updatedAt: string | null;
-    deletedAt: string | null;
+    createdAt: Date;
+    updatedAt: Date | null;
+    deletedAt: Date | null;
     etnsClis: EtnsCli[];
     tmnClis: TmnCli[];
     viajes: Viaje[];

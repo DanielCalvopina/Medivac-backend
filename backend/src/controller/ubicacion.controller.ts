@@ -1,57 +1,129 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { UbicacionService } from '../service/ubicacion.service';
 
+import { CreateEstacionesDto, UpdateEstacionesDto } from '../dto/estaciones.dto';
+import { CreateTerminalDto, UpdateTerminalDto } from '../dto/terminal.dto';
+import { UbicacionesItemsDto, VinculoEstacionClienteDto, VinculoTerminalClienteDto } from '../dto/ubicacion.dto';
+
 @Controller('ubicaciones')
 export class UbicacionController {
   constructor(private readonly svc: UbicacionService) {}
 
-  // ====== ESTACIONES ======
+  // ==========================================
+  //           BUNDLE (TODO EN UNO)
+  // ==========================================
+  @Get('getUbicaciones')
+  getUbicaciones(): Promise<UbicacionesItemsDto> {
+    return this.svc.getUbicaciones();
+  }
+
+  // ==========================================
+  //       VISTAS COMPUESTAS (Relaciones)
+  // ==========================================
+  @Get('estaciones-con-clientes')
+  estacionesConClientes() {
+    return this.svc.estacionesConClientes();
+  }
+
+  @Get('terminales-con-clientes')
+  terminalesConClientes() {
+    return this.svc.terminalesConClientes();
+  }
+
+  // ==========================================
+  //               ESTACIONES
+  // ==========================================
   @Get('estaciones')
-  listEstaciones() { return this.svc.listEstaciones(); }
+  listEstaciones() {
+    return this.svc.listEstaciones();
+  }
 
   @Get('estaciones/:etnsId')
-  getEstacion(@Param('etnsId', ParseIntPipe) etnsId: number) { return this.svc.getEstacion(etnsId); }
+  getEstacion(@Param('etnsId', ParseIntPipe) etnsId: number) {
+    return this.svc.getEstacion(etnsId);
+  }
 
   @Post('estaciones')
-  createEstacion(@Body() body: any) { return this.svc.createEstacion(body); }
+  createEstacion(@Body() body: CreateEstacionesDto) {
+    return this.svc.createEstacion(body);
+  }
 
   @Patch('estaciones/:etnsId')
-  updateEstacion(@Param('etnsId', ParseIntPipe) etnsId: number, @Body() body: any) {
+  updateEstacion(
+    @Param('etnsId', ParseIntPipe) etnsId: number, 
+    @Body() body: UpdateEstacionesDto
+  ) {
     return this.svc.updateEstacion(etnsId, body);
   }
 
-  @Delete('estaciones/:etnsId')
-  deleteEstacion(@Param('etnsId', ParseIntPipe) etnsId: number) { return this.svc.deleteEstacion(etnsId); }
+  @Patch('estaciones/:etnsId/toggle-status')
+  toggleEstacionStatus(@Param('etnsId', ParseIntPipe) etnsId: number) {
+    return this.svc.toggleEstacionStatus(etnsId);
+  }
 
-  // ====== TERMINALES ======
+  @Delete('estaciones/:etnsId')
+  deleteEstacion(@Param('etnsId', ParseIntPipe) etnsId: number) {
+    return this.svc.deleteEstacion(etnsId);
+  }
+
+  // ==========================================
+  //               TERMINALES
+  // ==========================================
   @Get('terminales')
-  listTerminales() { return this.svc.listTerminales(); }
+  listTerminales() {
+    return this.svc.listTerminales();
+  }
 
   @Get('terminales/:trmId')
-  getTerminal(@Param('trmId', ParseIntPipe) trmId: number) { return this.svc.getTerminal(trmId); }
+  getTerminal(@Param('trmId', ParseIntPipe) trmId: number) {
+    return this.svc.getTerminal(trmId);
+  }
 
   @Post('terminales')
-  createTerminal(@Body() body: any) { return this.svc.createTerminal(body); }
+  createTerminal(@Body() body: CreateTerminalDto) {
+    return this.svc.createTerminal(body);
+  }
 
   @Patch('terminales/:trmId')
-  updateTerminal(@Param('trmId', ParseIntPipe) trmId: number, @Body() body: any) {
+  updateTerminal(
+    @Param('trmId', ParseIntPipe) trmId: number, 
+    @Body() body: UpdateTerminalDto
+  ) {
     return this.svc.updateTerminal(trmId, body);
   }
 
-  @Delete('terminales/:trmId')
-  deleteTerminal(@Param('trmId', ParseIntPipe) trmId: number) { return this.svc.deleteTerminal(trmId); }
+  @Patch('terminales/:trmId/toggle-status')
+  toggleTerminalStatus(@Param('trmId', ParseIntPipe) trmId: number) {
+    return this.svc.toggleTerminalStatus(trmId);
+  }
 
-  // ====== VÍNCULOS ======
+  @Delete('terminales/:trmId')
+  deleteTerminal(@Param('trmId', ParseIntPipe) trmId: number) {
+    return this.svc.deleteTerminal(trmId);
+  }
+
+  // ==========================================
+  //           VINCULACIÓN (Endpoints)
+  // ==========================================
   @Post('vinculos/estacion-cliente')
-  vincularEstacionCliente(@Body() body: { etnsId: number; cliId: number }) {
-    return this.svc.vincularEstacionCliente(Number(body.etnsId), Number(body.cliId));
+  vincularEstacionCliente(@Body() body: VinculoEstacionClienteDto) {
+    return this.svc.vincularEstacionCliente({
+      etnsId: Number(body.etnsId),
+      cliId: Number(body.cliId),
+    });
   }
 
   @Post('vinculos/terminal-cliente')
-  vincularTerminalCliente(@Body() body: { trmId: number; cliId: number }) {
-    return this.svc.vincularTerminalCliente(Number(body.trmId), Number(body.cliId));
+  vincularTerminalCliente(@Body() body: VinculoTerminalClienteDto) {
+    return this.svc.vincularTerminalCliente({
+      trmId: Number(body.trmId),
+      cliId: Number(body.cliId),
+    });
   }
-    // ====== GET por cliente ======
+
+  // ==========================================
+  //        FILTROS POR CLIENTE (Utils)
+  // ==========================================
   @Get('clientes/:cliId/estaciones')
   estacionesPorCliente(@Param('cliId', ParseIntPipe) cliId: number) {
     return this.svc.estacionesPorCliente(cliId);
@@ -61,16 +133,4 @@ export class UbicacionController {
   terminalesPorCliente(@Param('cliId', ParseIntPipe) cliId: number) {
     return this.svc.terminalesPorCliente(cliId);
   }
-// ====== CLIENTES POR ESTACIÓN ======
-  @Get('estaciones/:etnsId/clientes')
-  clientesPorEstacion(@Param('etnsId', ParseIntPipe) etnsId: number) {
-    return this.svc.clientesPorEstacion(etnsId);
-  }
-
-  // ====== CLIENTES POR TERMINAL ======
-  @Get('terminales/:trmId/clientes')
-  clientesPorTerminal(@Param('trmId', ParseIntPipe) trmId: number) {
-    return this.svc.clientesPorTerminal(trmId);
-  }
-
 }

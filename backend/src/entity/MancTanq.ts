@@ -1,7 +1,6 @@
 import {
   Column,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -9,10 +8,6 @@ import {
 import { Mancuerna } from "./Mancuerna";
 import { Tanque } from "./Tanque";
 
-@Index("relationship_46_fk", ["mncId"], {})
-@Index("manc_tanq_pk", ["mncTanqId"], { unique: true })
-@Index("pk_manc_tanq", ["mncTanqId"], { unique: true })
-@Index("relationship_45_fk", ["tnqId"], {})
 @Entity("manc_tanq", { schema: "public" })
 export class MancTanq {
   @PrimaryGeneratedColumn({ type: "integer", name: "mnc_tanq_id" })
@@ -25,8 +20,8 @@ export class MancTanq {
   tnqId: number | null;
 
   @ManyToOne(() => Mancuerna, (mancuerna) => mancuerna.mancTanqs, {
-    onDelete: "RESTRICT",
-    onUpdate: "RESTRICT",
+    onDelete: "CASCADE", // Si borran la mancuerna, se borra el vínculo
+    onUpdate: "CASCADE",
   })
   @JoinColumn([{ name: "mnc_id", referencedColumnName: "mncId" }])
   mnc: Mancuerna;

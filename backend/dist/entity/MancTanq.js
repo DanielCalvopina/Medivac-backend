@@ -35,8 +35,8 @@ __decorate([
 ], MancTanq.prototype, "tnqId", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => Mancuerna_1.Mancuerna, (mancuerna) => mancuerna.mancTanqs, {
-        onDelete: "RESTRICT",
-        onUpdate: "RESTRICT",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
     }),
     (0, typeorm_1.JoinColumn)([{ name: "mnc_id", referencedColumnName: "mncId" }]),
     __metadata("design:type", Mancuerna_1.Mancuerna)
@@ -50,10 +50,6 @@ __decorate([
     __metadata("design:type", Tanque_1.Tanque)
 ], MancTanq.prototype, "tnq", void 0);
 exports.MancTanq = MancTanq = __decorate([
-    (0, typeorm_1.Index)("relationship_46_fk", ["mncId"], {}),
-    (0, typeorm_1.Index)("manc_tanq_pk", ["mncTanqId"], { unique: true }),
-    (0, typeorm_1.Index)("pk_manc_tanq", ["mncTanqId"], { unique: true }),
-    (0, typeorm_1.Index)("relationship_45_fk", ["tnqId"], {}),
     (0, typeorm_1.Entity)("manc_tanq", { schema: "public" })
 ], MancTanq);
 //# sourceMappingURL=MancTanq.js.map

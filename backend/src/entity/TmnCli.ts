@@ -10,8 +10,8 @@ import { Cliente } from "./Cliente";
 import { Terminal } from "./Terminal";
 
 @Index("relationship_39_fk", ["cliId"], {})
-@Index("tmn_cli_pk", ["trmCliId"], { unique: true })
 @Index("pk_tmn_cli", ["trmCliId"], { unique: true })
+@Index("tmn_cli_pk", ["trmCliId"], { unique: true })
 @Index("relationship_38_fk", ["trmId"], {})
 @Entity("tmn_cli", { schema: "public" })
 export class TmnCli {

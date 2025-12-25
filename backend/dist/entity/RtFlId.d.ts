@@ -4,6 +4,6 @@ export declare class RtFlId {
     rtsVijId: number;
     viajeId: number;
     etnsId2: number;
-    etnsId: Rutas;
+    ruta: Rutas;
     viaje: Viaje;
 }

@@ -1,88 +1,13 @@
 import { MancuernaService } from '../service/mancuerna.service';
+import { CreateMancuernaDto, UpdateMancuernaDto } from '../dto/mancuerna.dto';
 export declare class MancuernaController {
-    private readonly mancuernaService;
-    constructor(mancuernaService: MancuernaService);
-    create(data: any): Promise<{
-        tanques: import("../entity/Tanque").Tanque[];
-        tanque1: import("../entity/Tanque").Tanque;
-        tanque2: import("../entity/Tanque").Tanque;
-        mncId: number;
-        trPlc: string;
-        dollyId: string;
-        opCed: string | null;
-        mncNom: string;
-        npmcDesc: string;
-        status: number;
-        createdAt: string | null;
-        updatedAt: string | null;
-        deletedAt: string | null;
-        mancTanqs: import("../entity/MancTanq").MancTanq[];
-        dolly: import("../entity/Dolly").Dolly;
-        opCed2: import("../entity/Operador").Operador;
-        trPlc2: import("../entity/Tracto").Tracto;
-        viajes: import("../entity/Viaje").Viaje[];
-    }>;
-    findAll(): Promise<{
-        tanques: import("../entity/Tanque").Tanque[];
-        tanque1: import("../entity/Tanque").Tanque;
-        tanque2: import("../entity/Tanque").Tanque;
-        mncId: number;
-        trPlc: string;
-        dollyId: string;
-        opCed: string | null;
-        mncNom: string;
-        npmcDesc: string;
-        status: number;
-        createdAt: string | null;
-        updatedAt: string | null;
-        deletedAt: string | null;
-        mancTanqs: import("../entity/MancTanq").MancTanq[];
-        dolly: import("../entity/Dolly").Dolly;
-        opCed2: import("../entity/Operador").Operador;
-        trPlc2: import("../entity/Tracto").Tracto;
-        viajes: import("../entity/Viaje").Viaje[];
-    }[]>;
-    findOne(id: number): Promise<{
-        tanques: import("../entity/Tanque").Tanque[];
-        tanque1: import("../entity/Tanque").Tanque;
-        tanque2: import("../entity/Tanque").Tanque;
-        mncId: number;
-        trPlc: string;
-        dollyId: string;
-        opCed: string | null;
-        mncNom: string;
-        npmcDesc: string;
-        status: number;
-        createdAt: string | null;
-        updatedAt: string | null;
-        deletedAt: string | null;
-        mancTanqs: import("../entity/MancTanq").MancTanq[];
-        dolly: import("../entity/Dolly").Dolly;
-        opCed2: import("../entity/Operador").Operador;
-        trPlc2: import("../entity/Tracto").Tracto;
-        viajes: import("../entity/Viaje").Viaje[];
-    }>;
-    update(id: number, data: any): Promise<{
-        tanques: import("../entity/Tanque").Tanque[];
-        tanque1: import("../entity/Tanque").Tanque;
-        tanque2: import("../entity/Tanque").Tanque;
-        mncId: number;
-        trPlc: string;
-        dollyId: string;
-        opCed: string | null;
-        mncNom: string;
-        npmcDesc: string;
-        status: number;
-        createdAt: string | null;
-        updatedAt: string | null;
-        deletedAt: string | null;
-        mancTanqs: import("../entity/MancTanq").MancTanq[];
-        dolly: import("../entity/Dolly").Dolly;
-        opCed2: import("../entity/Operador").Operador;
-        trPlc2: import("../entity/Tracto").Tracto;
-        viajes: import("../entity/Viaje").Viaje[];
-    }>;
-    remove(id: number): Promise<{
+    private readonly svc;
+    constructor(svc: MancuernaService);
+    findAll(): Promise<import("../dto/mancuerna.dto").MancuernaItemsDto>;
+    findOne(id: number): Promise<import("../dto/mancuerna.dto").MancuernaItemDto>;
+    create(body: CreateMancuernaDto): Promise<import("../dto/mancuerna.dto").MancuernaItemDto>;
+    desarmar(id: number): Promise<{
         message: string;
     }>;
+    update(id: number, body: UpdateMancuernaDto): null;
 }

@@ -16,10 +16,10 @@ let Rutas = class Rutas {
     etnsId2;
     rtsNombre;
     rtsDesc;
-    rtsMpas;
+    status;
+    rtsMaps;
     rtsOrigen;
     rtsDestino;
-    status;
     createdAt;
     updatedAt;
     deletedAt;
@@ -31,48 +31,46 @@ __decorate([
     __metadata("design:type", Number)
 ], Rutas.prototype, "etnsId2", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "rts_nombre", length: 60 }),
+    (0, typeorm_1.Column)("character varying", { name: "rts_nombre", length: 255 }),
     __metadata("design:type", String)
 ], Rutas.prototype, "rtsNombre", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "rts_desc", length: 60 }),
+    (0, typeorm_1.Column)("character varying", { name: "rts_desc", length: 255 }),
     __metadata("design:type", String)
 ], Rutas.prototype, "rtsDesc", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "rts_mpas", length: 552 }),
-    __metadata("design:type", Object)
-], Rutas.prototype, "rtsMpas", void 0);
-__decorate([
-    (0, typeorm_1.Column)("character varying", { name: "rts_origen", length: 260 }),
-    __metadata("design:type", String)
-], Rutas.prototype, "rtsOrigen", void 0);
-__decorate([
-    (0, typeorm_1.Column)("character varying", { name: "rts_destino", length: 260 }),
-    __metadata("design:type", String)
-], Rutas.prototype, "rtsDestino", void 0);
-__decorate([
-    (0, typeorm_1.Column)("boolean", { name: "status" }),
+    (0, typeorm_1.Column)("boolean", { name: "status", default: true }),
     __metadata("design:type", Boolean)
 ], Rutas.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "created_at" }),
-    __metadata("design:type", String)
+    (0, typeorm_1.Column)("character varying", { name: "rts_maps", nullable: true, length: 1050 }),
+    __metadata("design:type", Object)
+], Rutas.prototype, "rtsMaps", void 0);
+__decorate([
+    (0, typeorm_1.Column)("character varying", { name: "rts_origen", nullable: true, length: 255 }),
+    __metadata("design:type", Object)
+], Rutas.prototype, "rtsOrigen", void 0);
+__decorate([
+    (0, typeorm_1.Column)("character varying", { name: "rts_destino", nullable: true, length: 255 }),
+    __metadata("design:type", Object)
+], Rutas.prototype, "rtsDestino", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)({ name: "created_at", type: 'date' }),
+    __metadata("design:type", Date)
 ], Rutas.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "updated_at", nullable: true }),
+    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", type: 'date', nullable: true }),
     __metadata("design:type", Object)
 ], Rutas.prototype, "updatedAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "deleted_at", nullable: true }),
+    (0, typeorm_1.DeleteDateColumn)({ name: "deleted_at", type: 'date', nullable: true }),
     __metadata("design:type", Object)
 ], Rutas.prototype, "deletedAt", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => RtFlId_1.RtFlId, (rtFlId) => rtFlId.etnsId),
+    (0, typeorm_1.OneToMany)(() => RtFlId_1.RtFlId, (rtFlId) => rtFlId.ruta),
     __metadata("design:type", Array)
 ], Rutas.prototype, "rtFlS", void 0);
 exports.Rutas = Rutas = __decorate([
-    (0, typeorm_1.Index)("rutas_pk", ["etnsId2"], { unique: true }),
-    (0, typeorm_1.Index)("pk_rutas", ["etnsId2"], { unique: true }),
     (0, typeorm_1.Entity)("rutas", { schema: "public" })
 ], Rutas);
 //# sourceMappingURL=Rutas.js.map

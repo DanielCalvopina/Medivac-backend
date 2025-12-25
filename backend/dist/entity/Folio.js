@@ -24,12 +24,11 @@ let Folio = class Folio {
     folCod;
     folName;
     folDesc;
-    folOv;
     status;
+    tnqNumse;
     createdAt;
     updatedAt;
     deletedAt;
-    tnqNumse;
     cargas;
     descargas;
     docFolios;
@@ -63,29 +62,25 @@ __decorate([
     __metadata("design:type", String)
 ], Folio.prototype, "folDesc", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "fol_ov", length: 255 }),
-    __metadata("design:type", String)
-], Folio.prototype, "folOv", void 0);
-__decorate([
-    (0, typeorm_1.Column)("boolean", { name: "status" }),
+    (0, typeorm_1.Column)("boolean", { name: "status", default: true }),
     __metadata("design:type", Boolean)
 ], Folio.prototype, "status", void 0);
-__decorate([
-    (0, typeorm_1.Column)("date", { name: "created_at", nullable: true }),
-    __metadata("design:type", Object)
-], Folio.prototype, "createdAt", void 0);
-__decorate([
-    (0, typeorm_1.Column)("date", { name: "updated_at", nullable: true }),
-    __metadata("design:type", Object)
-], Folio.prototype, "updatedAt", void 0);
-__decorate([
-    (0, typeorm_1.Column)("date", { name: "deleted_at", nullable: true }),
-    __metadata("design:type", Object)
-], Folio.prototype, "deletedAt", void 0);
 __decorate([
     (0, typeorm_1.Column)("character varying", { name: "tnq_numse", length: 255 }),
     __metadata("design:type", String)
 ], Folio.prototype, "tnqNumse", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)({ name: "created_at" }),
+    __metadata("design:type", Date)
+], Folio.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", nullable: true }),
+    __metadata("design:type", Object)
+], Folio.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)({ name: "deleted_at", nullable: true }),
+    __metadata("design:type", Object)
+], Folio.prototype, "deletedAt", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => Carga_1.Carga, (carga) => carga.fol),
     __metadata("design:type", Array)
@@ -103,26 +98,16 @@ __decorate([
     __metadata("design:type", Array)
 ], Folio.prototype, "estacionesFolios", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Producto_1.Producto, (producto) => producto.folios, {
-        onDelete: "RESTRICT",
-        onUpdate: "RESTRICT",
-    }),
+    (0, typeorm_1.ManyToOne)(() => Producto_1.Producto, (producto) => producto.folios),
     (0, typeorm_1.JoinColumn)([{ name: "prd_id", referencedColumnName: "prdId" }]),
     __metadata("design:type", Producto_1.Producto)
 ], Folio.prototype, "prd", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Viaje_1.Viaje, (viaje) => viaje.folios, {
-        onDelete: "RESTRICT",
-        onUpdate: "RESTRICT",
-    }),
+    (0, typeorm_1.ManyToOne)(() => Viaje_1.Viaje, (viaje) => viaje.folios),
     (0, typeorm_1.JoinColumn)([{ name: "viaje_id", referencedColumnName: "viajeId" }]),
     __metadata("design:type", Viaje_1.Viaje)
 ], Folio.prototype, "viaje", void 0);
 exports.Folio = Folio = __decorate([
-    (0, typeorm_1.Index)("pk_folio", ["folId"], { unique: true }),
-    (0, typeorm_1.Index)("detalle_folio_pk", ["folId"], { unique: true }),
-    (0, typeorm_1.Index)("relationship_7_fk", ["prdId"], {}),
-    (0, typeorm_1.Index)("relationship_8_fk", ["viajeId"], {}),
     (0, typeorm_1.Entity)("folio", { schema: "public" })
 ], Folio);
 //# sourceMappingURL=Folio.js.map

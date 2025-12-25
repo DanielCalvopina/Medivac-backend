@@ -1,6 +1,6 @@
 import { DocOp } from "./DocOp";
 import { Grupo } from "./Grupo";
-import { Mancuerna } from "./Mancuerna";
+import { MancOp } from "./MancOp";
 export declare class Operador {
     opCed: string;
     opNombre: string;
@@ -8,18 +8,15 @@ export declare class Operador {
     opTelefono: string;
     opCorreo: string;
     opNumLicencia: string;
-    opFcVencLicencia: string;
-    opFcVencDc3: string;
-    opFcVenCertMed: string;
+    opFcVencLicencia: Date | string;
+    opFcVencDc3: Date | string;
+    opFcVenCertMed: Date | string;
     status: boolean;
-    createdAt: string;
-    updatedAt: string | null;
-    deletedAt: string | null;
-    opPassword: string | null;
-    opVerificate: string;
-    opCodeAth: string | null;
-    opTimeToExp: string | null;
+    opTimeToExp: Date | string | null;
+    createdAt: Date;
+    updatedAt: Date | null;
+    deletedAt: Date | null;
     docOps: DocOp[];
     grupos: Grupo[];
-    mancuernas: Mancuerna[];
+    mancOps: MancOp[];
 }

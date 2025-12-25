@@ -1,14 +1,26 @@
-import { Column, Entity, Index, OneToMany } from "typeorm";
+import {
+  Column,
+  Entity,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  OneToMany,
+} from "typeorm";
 import { DocDolly } from "./DocDolly";
 import { Mancuerna } from "./Mancuerna";
 
-@Index("pk_dolly", ["dollyId"], { unique: true })
-@Index("dolly_pk", ["dollyId"], { unique: true })
 @Entity("dolly", { schema: "public" })
 export class Dolly {
-  @Column("character varying", { primary: true, name: "dolly_id", length: 30 })
+  // ==========================
+  //      IDENTIFICADORES
+  // ==========================
+  @PrimaryColumn("character varying", { name: "dolly_id", length: 30 })
   dollyId: string;
 
+  // ==========================
+  //      DATOS TÉCNICOS
+  // ==========================
   @Column("character varying", { name: "dolly_num_ser_4_ul", length: 30 })
   dollyNumSer_4Ul: string;
 
@@ -27,25 +39,30 @@ export class Dolly {
   @Column("character varying", { name: "dolly_desc", length: 255 })
   dollyDesc: string;
 
-  // 👉 NUEVOS CAMPOS AÑADIDOS
-  @Column("character varying", { name: "dolly_poliza_seguro", length: 60, nullable: true })
-  dollyPolizaSeguro: string | null;
+  @Column("character varying", { name: "dolly_poliza_seguro", length: 60 })
+  dollyPolizaSeguro: string;
 
-  @Column("timestamp", { name: "dolly_exp_poliza", nullable: true })
-  dollyExpPoliza: Date | null;
+  @Column("date", { name: "dolly_exp_poliza" })
+  dollyExpPoliza: string;
 
-  @Column("integer", { name: "status" })
+  @Column("integer", { name: "status", default: 1 })
   status: number;
 
-  @Column("date", { name: "created_at" })
-  createdAt: string;
+  // ==========================
+  //        AUDITORÍA
+  // ==========================
+  @CreateDateColumn({ name: "created_at", type: "date" })
+  createdAt: Date;
 
-  @Column("date", { name: "updated_at", nullable: true })
-  updatedAt: string | null;
+  @UpdateDateColumn({ name: "updated_at", type: "date", nullable: true })
+  updatedAt: Date | null;
 
-  @Column("date", { name: "deleted_at", nullable: true })
-  deletedAt: string | null;
+  @DeleteDateColumn({ name: "deleted_at", type: "date", nullable: true })
+  deletedAt: Date | null;
 
+  // ==========================
+  //       RELACIONES
+  // ==========================
   @OneToMany(() => DocDolly, (docDolly) => docDolly.dolly)
   docDollies: DocDolly[];
 

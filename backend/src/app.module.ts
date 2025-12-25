@@ -6,7 +6,6 @@ import { UnidadesModule } from './modules/unidades.module';
 import { ClienteModule } from './modules/cliente.module';
 import { OperadorModule } from './modules/operador.module';
 import { UbicacionModule } from './modules/ubicacion.module';
-import { AdminModule } from './modules/admin.module';
 import { RutasModule } from './modules/rutas.module';
 import { MancuernaModule } from './modules/mancuerna.module';
 import { ViajesModule } from './modules/viajes.module';
@@ -21,7 +20,6 @@ import { FilesModule } from './modules/files.module';
     ClienteModule,
     OperadorModule,
     UbicacionModule,
-    AdminModule,
     RutasModule,
     MancuernaModule,
     ViajesModule,

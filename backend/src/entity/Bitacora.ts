@@ -1,15 +1,15 @@
 import {
   Column,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
 } from "typeorm";
 import { Viaje } from "./Viaje";
 
-@Index("pk_bitacora", ["bitId"], { unique: true })
-@Index("bitacora_pk", ["bitId"], { unique: true })
 @Entity("bitacora", { schema: "public" })
 export class Bitacora {
   @PrimaryGeneratedColumn({ type: "integer", name: "bit_id" })
@@ -18,31 +18,31 @@ export class Bitacora {
   @Column("timestamp", { name: "bit_fec_ini" })
   bitFecIni: Date;
 
-  @Column("timestamp", { name: "bit_fec_fin" })
-  bitFecFin: Date;
+  @Column("timestamp", { name: "bit_fec_fin", nullable: true })
+  bitFecFin: Date | null;
 
-  @Column("integer", { name: "bit_tmp_total" })
-  bitTmpTotal: number;
+  @Column("integer", { name: "bit_tmp_total", nullable: true })
+  bitTmpTotal: number | null;
 
   @Column("character varying", { name: "bit_desc", length: 255 })
   bitDesc: string;
 
-  @Column("integer", { name: "status" })
+  @Column("integer", { name: "status", default: 1 })
   status: number;
 
-  @Column("timestamp", { name: "created_at" })
+  @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
 
-  @Column("timestamp", { name: "updated_at", nullable: true })
+  @UpdateDateColumn({ name: "updated_at", nullable: true })
   updatedAt: Date | null;
 
-  @Column("timestamp", { name: "deleted_at", nullable: true })
+  @DeleteDateColumn({ name: "deleted_at", nullable: true })
   deletedAt: Date | null;
 
-  @ManyToOne(() => Viaje, (viaje) => viaje.bitacoras, {
-    onDelete: "RESTRICT",
-    onUpdate: "RESTRICT",
-  })
+  @Column("integer", { name: "viaje_id" })
+  viajeId: number;
+
+  @ManyToOne(() => Viaje, (viaje) => viaje.bitacoras)
   @JoinColumn([{ name: "viaje_id", referencedColumnName: "viajeId" }])
   viaje: Viaje;
 }
