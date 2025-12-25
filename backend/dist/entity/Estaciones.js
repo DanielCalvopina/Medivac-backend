@@ -20,7 +20,6 @@ let Estaciones = class Estaciones {
     etnsNombreCorto;
     etnsDireccion;
     etnsUbicacion;
-    etnsTipo;
     etnsCiudad;
     status;
     createdAt;
@@ -35,51 +34,43 @@ __decorate([
     __metadata("design:type", Number)
 ], Estaciones.prototype, "etnsId", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "etns_num_pl", length: 60 }),
+    (0, typeorm_1.Column)("character varying", { name: "etns_num_pl", length: 255 }),
     __metadata("design:type", String)
 ], Estaciones.prototype, "etnsNumPl", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "erns_nombre", length: 60 }),
+    (0, typeorm_1.Column)("character varying", { name: "erns_nombre", length: 255 }),
     __metadata("design:type", String)
 ], Estaciones.prototype, "ernsNombre", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "etns_nombre_corto", length: 60 }),
+    (0, typeorm_1.Column)("character varying", { name: "etns_nombre_corto", length: 255 }),
     __metadata("design:type", String)
 ], Estaciones.prototype, "etnsNombreCorto", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "etns_direccion", length: 300 }),
+    (0, typeorm_1.Column)("character varying", { name: "etns_direccion", length: 1050 }),
     __metadata("design:type", String)
 ], Estaciones.prototype, "etnsDireccion", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "etns_ubicacion", length: 60 }),
+    (0, typeorm_1.Column)("character varying", { name: "etns_ubicacion", length: 255 }),
     __metadata("design:type", String)
 ], Estaciones.prototype, "etnsUbicacion", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "etns_tipo", length: 60 }),
-    __metadata("design:type", String)
-], Estaciones.prototype, "etnsTipo", void 0);
-__decorate([
-    (0, typeorm_1.Column)("character varying", {
-        name: "etns_ciudad",
-        nullable: true,
-        length: 60,
-    }),
+    (0, typeorm_1.Column)("character varying", { name: "etns_ciudad", nullable: true, length: 255 }),
     __metadata("design:type", Object)
 ], Estaciones.prototype, "etnsCiudad", void 0);
 __decorate([
-    (0, typeorm_1.Column)("boolean", { name: "status", nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.Column)("boolean", { name: "status", default: true }),
+    __metadata("design:type", Boolean)
 ], Estaciones.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "created_at", nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.CreateDateColumn)({ name: "created_at", type: 'date' }),
+    __metadata("design:type", Date)
 ], Estaciones.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "updated_at", nullable: true }),
+    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", type: 'date', nullable: true }),
     __metadata("design:type", Object)
 ], Estaciones.prototype, "updatedAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "deleted_at", nullable: true }),
+    (0, typeorm_1.DeleteDateColumn)({ name: "deleted_at", type: 'date', nullable: true }),
     __metadata("design:type", Object)
 ], Estaciones.prototype, "deletedAt", void 0);
 __decorate([
@@ -91,8 +82,6 @@ __decorate([
     __metadata("design:type", Array)
 ], Estaciones.prototype, "etnsClis", void 0);
 exports.Estaciones = Estaciones = __decorate([
-    (0, typeorm_1.Index)("estaciones_pk", ["etnsId"], { unique: true }),
-    (0, typeorm_1.Index)("pk_estaciones", ["etnsId"], { unique: true }),
     (0, typeorm_1.Entity)("estaciones", { schema: "public" })
 ], Estaciones);
 //# sourceMappingURL=Estaciones.js.map

@@ -6,8 +6,8 @@ export declare class Producto {
     prdMax: number;
     prdMin: number;
     status: boolean;
-    createdAt: string;
-    updatedAt: string | null;
-    deletedAt: string | null;
+    createdAt: Date;
+    updatedAt: Date | null;
+    deletedAt: Date | null;
     folios: Folio[];
 }

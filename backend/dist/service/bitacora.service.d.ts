@@ -1,17 +1,18 @@
 import { Repository } from 'typeorm';
-import { Bitacora } from 'src/entity/Bitacora';
-import { Viaje } from 'src/entity/Viaje';
+import { Bitacora } from '../entity/Bitacora';
+import { Viaje } from '../entity/Viaje';
+import { CreateBitacoraDto, UpdateBitacoraDto, BitacoraItemDto, BitacoraItemsDto } from '../dto/bitacora.dto';
 export declare class BitacoraService {
-    private readonly bitacoraRepository;
-    private readonly viajeRepository;
-    constructor(bitacoraRepository: Repository<Bitacora>, viajeRepository: Repository<Viaje>);
-    private todayStr;
-    create(data: any): Promise<Bitacora[]>;
-    findAll(): Promise<Bitacora[]>;
-    findOne(id: number): Promise<Bitacora>;
-    findByViaje(viajeId: number): Promise<Bitacora[]>;
-    update(id: number, data: any): Promise<Bitacora>;
+    private readonly bitRepo;
+    private readonly viajeRepo;
+    constructor(bitRepo: Repository<Bitacora>, viajeRepo: Repository<Viaje>);
+    private toResponseDto;
+    create(dto: CreateBitacoraDto): Promise<BitacoraItemDto>;
+    findAll(): Promise<BitacoraItemsDto>;
+    findOne(id: number): Promise<BitacoraItemDto>;
+    findByViaje(viajeId: number): Promise<BitacoraItemsDto>;
+    update(id: number, dto: UpdateBitacoraDto): Promise<BitacoraItemDto>;
     remove(id: number): Promise<{
-        message: string;
+        deleted: true;
     }>;
 }

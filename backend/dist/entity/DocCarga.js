@@ -71,8 +71,8 @@ __decorate([
 ], DocCarga.prototype, "carga", void 0);
 exports.DocCarga = DocCarga = __decorate([
     (0, typeorm_1.Index)("relationship_22_fk", ["cargaId"], {}),
-    (0, typeorm_1.Index)("doc_carga_pk", ["docCarId"], { unique: true }),
     (0, typeorm_1.Index)("pk_doc_carga", ["docCarId"], { unique: true }),
+    (0, typeorm_1.Index)("doc_carga_pk", ["docCarId"], { unique: true }),
     (0, typeorm_1.Entity)("doc_carga", { schema: "public" })
 ], DocCarga);
 //# sourceMappingURL=DocCarga.js.map

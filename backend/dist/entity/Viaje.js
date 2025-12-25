@@ -24,14 +24,12 @@ let Viaje = class Viaje {
     cliId;
     viajeCod;
     status;
-    createdAt;
-    updatedAt;
-    deletedAt;
     viajeInicio;
     viajeFin;
     viajeDuracion;
-    viajeEta;
-    viajeKm;
+    createdAt;
+    updatedAt;
+    deletedAt;
     bitacoras;
     docViajes;
     folios;
@@ -58,49 +56,33 @@ __decorate([
     __metadata("design:type", String)
 ], Viaje.prototype, "viajeCod", void 0);
 __decorate([
-    (0, typeorm_1.Column)("integer", { name: "status" }),
+    (0, typeorm_1.Column)("integer", { name: "status", default: 1 }),
     __metadata("design:type", Number)
 ], Viaje.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "created_at" }),
-    __metadata("design:type", String)
-], Viaje.prototype, "createdAt", void 0);
-__decorate([
-    (0, typeorm_1.Column)("date", { name: "updated_at", nullable: true }),
-    __metadata("design:type", Object)
-], Viaje.prototype, "updatedAt", void 0);
-__decorate([
-    (0, typeorm_1.Column)("date", { name: "deleted_at", nullable: true }),
-    __metadata("design:type", Object)
-], Viaje.prototype, "deletedAt", void 0);
-__decorate([
-    (0, typeorm_1.Column)("date", { name: "viaje_inicio", nullable: true }),
+    (0, typeorm_1.Column)("timestamp", { name: "viaje_inicio", nullable: true }),
     __metadata("design:type", Object)
 ], Viaje.prototype, "viajeInicio", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "viaje_fin", nullable: true }),
+    (0, typeorm_1.Column)("timestamp", { name: "viaje_fin", nullable: true }),
     __metadata("design:type", Object)
 ], Viaje.prototype, "viajeFin", void 0);
 __decorate([
-    (0, typeorm_1.Column)("double precision", {
-        name: "viaje_duracion",
-        nullable: true,
-        precision: 53,
-    }),
+    (0, typeorm_1.Column)("double precision", { name: "viaje_duracion", nullable: true, precision: 53 }),
     __metadata("design:type", Object)
 ], Viaje.prototype, "viajeDuracion", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "viaje_eta", nullable: true }),
-    __metadata("design:type", Object)
-], Viaje.prototype, "viajeEta", void 0);
+    (0, typeorm_1.CreateDateColumn)({ name: "created_at" }),
+    __metadata("design:type", Date)
+], Viaje.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("double precision", {
-        name: "viaje_km",
-        nullable: true,
-        precision: 53,
-    }),
+    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", nullable: true }),
     __metadata("design:type", Object)
-], Viaje.prototype, "viajeKm", void 0);
+], Viaje.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)({ name: "deleted_at", nullable: true }),
+    __metadata("design:type", Object)
+], Viaje.prototype, "deletedAt", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => Bitacora_1.Bitacora, (bitacora) => bitacora.viaje),
     __metadata("design:type", Array)
@@ -122,26 +104,16 @@ __decorate([
     __metadata("design:type", Array)
 ], Viaje.prototype, "terminalViajes", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Cliente_1.Cliente, (cliente) => cliente.viajes, {
-        onDelete: "RESTRICT",
-        onUpdate: "RESTRICT",
-    }),
+    (0, typeorm_1.ManyToOne)(() => Cliente_1.Cliente, (cliente) => cliente.viajes),
     (0, typeorm_1.JoinColumn)([{ name: "cli_id", referencedColumnName: "cliId" }]),
     __metadata("design:type", Cliente_1.Cliente)
 ], Viaje.prototype, "cli", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Mancuerna_1.Mancuerna, (mancuerna) => mancuerna.viajes, {
-        onDelete: "RESTRICT",
-        onUpdate: "RESTRICT",
-    }),
+    (0, typeorm_1.ManyToOne)(() => Mancuerna_1.Mancuerna, (mancuerna) => mancuerna.viajes),
     (0, typeorm_1.JoinColumn)([{ name: "mnc_id", referencedColumnName: "mncId" }]),
     __metadata("design:type", Mancuerna_1.Mancuerna)
 ], Viaje.prototype, "mnc", void 0);
 exports.Viaje = Viaje = __decorate([
-    (0, typeorm_1.Index)("relationship_6_fk", ["cliId"], {}),
-    (0, typeorm_1.Index)("relationship_5_fk", ["mncId"], {}),
-    (0, typeorm_1.Index)("pk_viaje", ["viajeId"], { unique: true }),
-    (0, typeorm_1.Index)("folio_pk", ["viajeId"], { unique: true }),
     (0, typeorm_1.Entity)("viaje", { schema: "public" })
 ], Viaje);
 //# sourceMappingURL=Viaje.js.map

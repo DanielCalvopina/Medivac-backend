@@ -1,19 +1,34 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
-import { Viaje } from 'src/entity/Viaje';
-import { Cliente } from 'src/entity/Cliente';
-import { Mancuerna } from 'src/entity/Mancuerna';
-import { Terminal } from 'src/entity/Terminal';
-import { TerminalViaje } from 'src/entity/TerminalViaje';
-import { Rutas } from 'src/entity/Rutas';
-import { RtFlId } from 'src/entity/RtFlId';
+// Entidades
+import { Viaje } from '../entity/Viaje';
+import { Cliente } from '../entity/Cliente';
+import { Mancuerna } from '../entity/Mancuerna';
+import { Rutas } from '../entity/Rutas';
+import { Terminal } from '../entity/Terminal';
+import { RtFlId } from '../entity/RtFlId';
+import { TerminalViaje } from '../entity/TerminalViaje';
 
-type CreateOrUpdateViaje = Partial<Viaje> & {
-  trmId?: number | string | null;
-  rtsId?: number | string | null;
-};
+// DTOs
+import { 
+  CreateViajeDto, 
+  UpdateViajeDto, 
+  ViajeItemDto, 
+  ViajeItemsDto, 
+  ViajeResponseDto 
+} from '../dto/viaje.dto';
+import { ClienteResponseDto } from '../dto/cliente.dto';
+import { MancuernaResponseDto } from '../dto/mancuerna.dto';
+import { RutasResponseDto } from '../dto/rutas.dto';
+import { TerminalResponseDto } from '../dto/terminal.dto';
+import { FolioResponseDto } from '../dto/folio.dto';
+import { BitacoraResponseDto } from '../dto/bitacora.dto';
+import { CargaResponseDto, SelloResponseDto } from '../dto/carga.dto';
+import { DescargaResponseDto } from '../dto/descarga.dto';
+import { EstacionesResponseDto } from '../dto/estaciones.dto';
+import { ProductoResponseDto } from '../dto/producto.dto';
 
 @Injectable()
 export class ViajesService {
@@ -21,217 +36,231 @@ export class ViajesService {
     @InjectRepository(Viaje) private readonly viajeRepo: Repository<Viaje>,
     @InjectRepository(Cliente) private readonly clienteRepo: Repository<Cliente>,
     @InjectRepository(Mancuerna) private readonly mancuernaRepo: Repository<Mancuerna>,
-    @InjectRepository(Terminal) private readonly terminalRepo: Repository<Terminal>,
-    @InjectRepository(TerminalViaje) private readonly termViajeRepo: Repository<TerminalViaje>,
     @InjectRepository(Rutas) private readonly rutasRepo: Repository<Rutas>,
-    @InjectRepository(RtFlId) private readonly rtflRepo: Repository<RtFlId>,
+    @InjectRepository(Terminal) private readonly terminalRepo: Repository<Terminal>,
+    @InjectRepository(RtFlId) private readonly rtFlRepo: Repository<RtFlId>,
+    @InjectRepository(TerminalViaje) private readonly tvRepo: Repository<TerminalViaje>,
   ) {}
 
-  private todayStr(): string {
-    return new Date().toISOString().slice(0, 10);
-  }
+  // ==========================
+  //      HELPER: MAPPER
+  // ==========================
+  private toResponseDto(v: Viaje): ViajeResponseDto {
+    // 1. Rutas
+    const rutasDtos = (v.rtFlS || []).map(link => ({ ...link.ruta } as RutasResponseDto));
+    
+    // 2. Terminales
+    const termDtos = (v.terminalViajes || []).map(link => ({ ...link.trm } as TerminalResponseDto));
 
-  private async nextRtFlId(): Promise<number> {
-    const last = await this.rtflRepo.find({
-      order: { rtsVijId: 'DESC' },
-      take: 1,
-    });
+    // 3. Bitácoras
+    const bitacorasDtos = (v.bitacoras || []).map(b => ({
+       ...b, 
+       viajeId: v.viajeId // Aseguramos el ID plano
+    } as BitacoraResponseDto));
 
-    return last.length ? last[0].rtsVijId + 1 : 1;
-  }
+    // 4. FOLIOS (Mapeo Profundo Manual para asegurar estructura)
+    const foliosDtos = (v.folios || []).map(f => {
+      // a. Estaciones del Folio
+      const estaciones = (f.estacionesFolios || []).map(ef => ({ ...ef.etns } as EstacionesResponseDto));
+      
+      // b. Cargas y sus Sellos
+      const cargas = (f.cargas || []).map(c => ({
+        ...c,
+        folio: null, // Evitar ciclo
+        sellos: (c.sellos || []).map(s => ({ sellosId: s.sellosId, sellosNum: s.sellosNum } as SelloResponseDto))
+      } as CargaResponseDto));
 
-  // ======================================================
-  // CREATE
-  // ======================================================
-  async create(data: CreateOrUpdateViaje) {
-    const today = this.todayStr();
-
-    const dto: DeepPartial<Viaje> = {
-      ...data,
-      createdAt: today,
-      updatedAt: today,
-    };
-
-    const entity = this.viajeRepo.create(dto);
-    const viaje = await this.viajeRepo.save(entity);
-
-    // -------- TERMINAL --------
-    if (data.trmId != null && String(data.trmId).trim() !== '') {
-      const tId = Number(data.trmId);
-
-      const terminal = await this.terminalRepo.findOne({ where: { trmId: tId } });
-      if (!terminal) throw new NotFoundException(`Terminal ${tId} no existe`);
-
-      await this.termViajeRepo.delete({ viajeId: viaje.viajeId });
-
-      await this.termViajeRepo.save(
-        this.termViajeRepo.create({
-          viajeId: viaje.viajeId,
-          trmId: tId,
-        }),
-      );
-    }
-
-    // -------- RUTA -------- (CORREGIDO)
-    if (data.rtsId != null && String(data.rtsId).trim() !== '') {
-      const rId = Number(data.rtsId);
-
-      const ruta = await this.rutasRepo.findOne({ where: { etnsId2: rId } });
-      if (!ruta) throw new NotFoundException(`Ruta ${rId} no existe`);
-
-      const newId = await this.nextRtFlId(); // << AUTO ID
-
-      await this.rtflRepo.save(
-        this.rtflRepo.create({
-          rtsVijId: newId,
-          viajeId: viaje.viajeId,
-          etnsId2: rId,
-        }),
-      );
-    }
-
-    return this.findOne(viaje.viajeId);
-  }
-
-  // ======================================================
-  // GET ALL
-  // ======================================================
-  async findAll() {
-    const viajes = await this.viajeRepo.find({
-      relations: ['cli', 'mnc'],
-      order: { viajeId: 'ASC' },
-    });
-
-    if (!viajes.length) return [];
-
-    const ids = viajes.map(v => v.viajeId);
-
-    const linksTerm = await this.termViajeRepo.find({ where: { viajeId: In(ids) } });
-    const linksRuta = await this.rtflRepo.find({ where: { viajeId: In(ids) } });
-
-    const termIds = Array.from(new Set(linksTerm.map(l => l.trmId).filter(id => id)));
-    const rutaIds = Array.from(new Set(linksRuta.map(l => l.etnsId2).filter(id => id)));
-
-    const terminales = termIds.length
-      ? await this.terminalRepo.find({ where: { trmId: In(termIds) } })
-      : [];
-
-    const rutas = rutaIds.length
-      ? await this.rutasRepo.find({ where: { etnsId2: In(rutaIds) } })
-      : [];
-
-    const mapTerm = new Map<number, Terminal>();
-    const mapRuta = new Map<number, Rutas>();
-
-    terminales.forEach(t => mapTerm.set(t.trmId, t));
-    rutas.forEach(r => mapRuta.set(r.etnsId2, r));
-
-    return viajes.map(v => {
-      const tLink = linksTerm.find(l => l.viajeId === v.viajeId);
-      const rLink = linksRuta.find(l => l.viajeId === v.viajeId);
+      // c. Descargas
+      const descargas = (f.descargas || []).map(d => ({
+        ...d,
+        folio: null // Evitar ciclo
+      } as DescargaResponseDto));
 
       return {
-        ...v,
-        terminal: tLink?.trmId ? mapTerm.get(tLink.trmId) ?? null : null,
-        ruta: rLink?.etnsId2 ? mapRuta.get(rLink.etnsId2) ?? null : null,
-      };
+        folId: f.folId,
+        folCod: f.folCod,
+        folName: f.folName,
+        folDesc: f.folDesc,
+        tnqNumse: f.tnqNumse,
+        status: f.status,
+        createdAt: f.createdAt,
+        updatedAt: f.updatedAt,
+        deletedAt: f.deletedAt,
+        producto: f.prd ? ({ ...f.prd } as ProductoResponseDto) : null,
+        estaciones: estaciones,
+        cargas: cargas,
+        descargas: descargas
+      } as FolioResponseDto;
     });
+
+    return {
+      viajeId: v.viajeId,
+      viajeCod: v.viajeCod,
+      status: v.status,
+      viajeInicio: v.viajeInicio,
+      viajeFin: v.viajeFin,
+      viajeDuracion: v.viajeDuracion,
+      createdAt: v.createdAt,
+      updatedAt: v.updatedAt,
+      
+      cliente: v.cli ? ({ ...v.cli } as ClienteResponseDto) : null,
+      mancuerna: v.mnc ? ({ ...v.mnc } as any as MancuernaResponseDto) : null, 
+      
+      rutas: rutasDtos,
+      terminales: termDtos,
+      folios: foliosDtos,
+      bitacoras: bitacorasDtos
+    };
   }
 
-  // ======================================================
-  // GET ONE
-  // ======================================================
-  async findOne(id: number) {
+  // ==========================
+  //        HELPER: RELATIONS
+  // ==========================
+  // Definimos las relaciones necesarias para traer TODO el árbol
+  private getRelations(): string[] {
+    return [
+      'cli', 
+      'mnc',
+      'rtFlS', 'rtFlS.ruta',
+      'terminalViajes', 'terminalViajes.trm',
+      'bitacoras',
+      // ÁRBOL DE FOLIOS COMPLETO:
+      'folios',
+      'folios.prd',                        // Producto
+      'folios.estacionesFolios', 'folios.estacionesFolios.etns', // Estaciones
+      'folios.cargas', 'folios.cargas.sellos', // Cargas y Sellos
+      'folios.descargas'                   // Descargas
+    ];
+  }
+
+  // ==========================
+  //        FIND ONE
+  // ==========================
+  async findOne(id: number): Promise<ViajeItemDto> {
     const viaje = await this.viajeRepo.findOne({
       where: { viajeId: id },
-      relations: ['cli', 'mnc'],
+      relations: this.getRelations() // Usamos el helper de relaciones profundas
     });
 
     if (!viaje) throw new NotFoundException(`Viaje ${id} no encontrado`);
-
-    const linkTerm = await this.termViajeRepo.findOne({ where: { viajeId: id } });
-    const linkRuta = await this.rtflRepo.findOne({ where: { viajeId: id } });
-
-    let terminal: Terminal | null = null;
-    let ruta: Rutas | null = null;
-
-    if (linkTerm?.trmId != null) {
-      terminal = await this.terminalRepo.findOne({ where: { trmId: linkTerm.trmId } }) ?? null;
-    }
-
-    if (linkRuta?.etnsId2 != null) {
-      ruta = await this.rutasRepo.findOne({ where: { etnsId2: linkRuta.etnsId2 } }) ?? null;
-    }
-
-    return { ...viaje, terminal, ruta };
+    return { items: { viaje: this.toResponseDto(viaje) } };
   }
 
-  // ======================================================
-  // UPDATE
-  // ======================================================
-  async update(id: number, data: CreateOrUpdateViaje) {
-    const today = this.todayStr();
+  // ==========================
+  //        FIND ALL
+  // ==========================
+  async findAll(): Promise<ViajeItemsDto> {
+    const viajes = await this.viajeRepo.find({
+      relations: this.getRelations(), // También traemos todo en el listado
+      order: { createdAt: 'DESC' }
+    });
 
-    const exists = await this.viajeRepo.findOne({ where: { viajeId: id } });
-    if (!exists) throw new NotFoundException(`Viaje ${id} no encontrado`);
+    return { items: { viajes: viajes.map(v => this.toResponseDto(v)) } };
+  }
 
-    await this.viajeRepo.update(id, { ...data, updatedAt: today });
+  // ==========================
+  //         CREATE
+  // ==========================
+  async create(dto: CreateViajeDto): Promise<ViajeItemDto> {
+    const cli = await this.clienteRepo.findOne({ where: { cliId: dto.cliId } });
+    if (!cli) throw new NotFoundException('Cliente no encontrado');
+    const mnc = await this.mancuernaRepo.findOne({ where: { mncId: dto.mncId } });
+    if (!mnc) throw new NotFoundException('Mancuerna no encontrada');
 
-    // -------- TERMINAL --------
-    if ('trmId' in data) {
-      await this.termViajeRepo.delete({ viajeId: id });
+    const viaje = this.viajeRepo.create({
+      mncId: dto.mncId,
+      cliId: dto.cliId,
+      viajeCod: dto.viajeCod,
+      status: 1, 
+    });
+    const saved = await this.viajeRepo.save(viaje);
 
-      if (data.trmId != null && String(data.trmId).trim() !== '') {
-        const tid = Number(data.trmId);
+    if (dto.rutasIds?.length) {
+      const links = dto.rutasIds.map(rid => this.rtFlRepo.create({ viajeId: saved.viajeId, etnsId2: rid }));
+      await this.rtFlRepo.save(links);
+    }
 
-        const terminal = await this.terminalRepo.findOne({ where: { trmId: tid } });
-        if (!terminal) throw new NotFoundException(`Terminal ${tid} no existe`);
+    if (dto.terminalesIds?.length) {
+      const links = dto.terminalesIds.map(tid => this.tvRepo.create({ viajeId: saved.viajeId, trmId: tid }));
+      await this.tvRepo.save(links);
+    }
 
-        await this.termViajeRepo.save(
-          this.termViajeRepo.create({
-            viajeId: id,
-            trmId: tid,
-          }),
-        );
+    return this.findOne(saved.viajeId);
+  }
+
+  // ==========================
+  //     INICIAR VIAJE
+  // ==========================
+  async iniciarViaje(id: number): Promise<ViajeItemDto> {
+    const viaje = await this.viajeRepo.findOne({ where: { viajeId: id } });
+    if (!viaje) throw new NotFoundException('Viaje no encontrado');
+    if (viaje.status !== 1) throw new BadRequestException('El viaje no está en estado pendiente');
+
+    viaje.status = 2; 
+    viaje.viajeInicio = new Date(); 
+    await this.viajeRepo.save(viaje);
+
+    return this.findOne(id);
+  }
+
+  // ==========================
+  //     FINALIZAR VIAJE
+  // ==========================
+  async finalizarViaje(id: number): Promise<ViajeItemDto> {
+    const viaje = await this.viajeRepo.findOne({ where: { viajeId: id } });
+    if (!viaje) throw new NotFoundException('Viaje no encontrado');
+    if (viaje.status !== 2) throw new BadRequestException('El viaje no está en curso');
+    if (!viaje.viajeInicio) throw new BadRequestException('El viaje no tiene fecha de inicio registrada');
+
+    const now = new Date();
+    viaje.status = 3; 
+    viaje.viajeFin = now;
+
+    const diffMs = now.getTime() - viaje.viajeInicio.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60); 
+    viaje.viajeDuracion = parseFloat(diffHours.toFixed(2));
+
+    await this.viajeRepo.save(viaje);
+
+    return this.findOne(id);
+  }
+
+  // ==========================
+  //         UPDATE
+  // ==========================
+  async update(id: number, dto: UpdateViajeDto): Promise<ViajeItemDto> {
+    const viaje = await this.viajeRepo.preload({
+      viajeId: id,
+      ...dto
+    });
+    if (!viaje) throw new NotFoundException('Viaje no encontrado');
+    await this.viajeRepo.save(viaje);
+
+    if (dto.rutasIds) {
+      await this.rtFlRepo.delete({ viajeId: id });
+      if (dto.rutasIds.length) {
+         await this.rtFlRepo.save(dto.rutasIds.map(rid => this.rtFlRepo.create({ viajeId: id, etnsId2: rid })));
       }
     }
 
-    // -------- RUTA -------- (CORREGIDO)
-    if ('rtsId' in data) {
-      await this.rtflRepo.delete({ viajeId: id });
-
-      if (data.rtsId != null && String(data.rtsId).trim() !== '') {
-        const rid = Number(data.rtsId);
-
-        const ruta = await this.rutasRepo.findOne({ where: { etnsId2: rid } });
-        if (!ruta) throw new NotFoundException(`Ruta ${rid} no existe`);
-
-        const newId = await this.nextRtFlId();
-
-        await this.rtflRepo.save(
-          this.rtflRepo.create({
-            rtsVijId: newId,
-            viajeId: id,
-            etnsId2: rid,
-          }),
-        );
+    if (dto.terminalesIds) {
+      await this.tvRepo.delete({ viajeId: id });
+      if (dto.terminalesIds.length) {
+         await this.tvRepo.save(dto.terminalesIds.map(tid => this.tvRepo.create({ viajeId: id, trmId: tid })));
       }
     }
 
     return this.findOne(id);
   }
 
-  // ======================================================
-  // DELETE
-  // ======================================================
+  // ==========================
+  //         DELETE
+  // ==========================
   async remove(id: number) {
-    const viaje = await this.viajeRepo.findOne({ where: { viajeId: id } });
-    if (!viaje) throw new NotFoundException(`Viaje ${id} no encontrado`);
-
-    await this.termViajeRepo.delete({ viajeId: id });
-    await this.rtflRepo.delete({ viajeId: id });
-    await this.viajeRepo.remove(viaje);
-
-    return { message: `Viaje ${id} eliminado correctamente` };
+    await this.rtFlRepo.delete({ viajeId: id });
+    await this.tvRepo.delete({ viajeId: id });
+    const res = await this.viajeRepo.softDelete(id);
+    if (!res.affected) throw new NotFoundException('Viaje no encontrado');
+    return { message: `Viaje ${id} eliminado` };
   }
 }

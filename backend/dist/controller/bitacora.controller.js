@@ -15,69 +15,70 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BitacoraController = void 0;
 const common_1 = require("@nestjs/common");
 const bitacora_service_1 = require("../service/bitacora.service");
+const bitacora_dto_1 = require("../dto/bitacora.dto");
 let BitacoraController = class BitacoraController {
-    bitacoraService;
-    constructor(bitacoraService) {
-        this.bitacoraService = bitacoraService;
+    svc;
+    constructor(svc) {
+        this.svc = svc;
     }
-    async create(data) {
-        return await this.bitacoraService.create(data);
+    findAll() {
+        return this.svc.findAll();
     }
-    async findAll() {
-        return await this.bitacoraService.findAll();
+    findOne(id) {
+        return this.svc.findOne(id);
     }
-    async findOne(id) {
-        return await this.bitacoraService.findOne(id);
+    findByViaje(viajeId) {
+        return this.svc.findByViaje(viajeId);
     }
-    async findByViaje(viajeId) {
-        return await this.bitacoraService.findByViaje(viajeId);
+    create(body) {
+        return this.svc.create(body);
     }
-    async update(id, data) {
-        return await this.bitacoraService.update(id, data);
+    update(id, body) {
+        return this.svc.update(id, body);
     }
-    async remove(id) {
-        return await this.bitacoraService.remove(id);
+    remove(id) {
+        return this.svc.remove(id);
     }
 };
 exports.BitacoraController = BitacoraController;
 __decorate([
-    (0, common_1.Post)('create'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], BitacoraController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)('list'),
+    (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], BitacoraController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], BitacoraController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Get)('viaje/:viajeId'),
-    __param(0, (0, common_1.Param)('viajeId')),
+    __param(0, (0, common_1.Param)('viajeId', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], BitacoraController.prototype, "findByViaje", null);
 __decorate([
-    (0, common_1.Put)('update/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [bitacora_dto_1.CreateBitacoraDto]),
+    __metadata("design:returntype", Promise)
+], BitacoraController.prototype, "create", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:paramtypes", [Number, bitacora_dto_1.UpdateBitacoraDto]),
     __metadata("design:returntype", Promise)
 ], BitacoraController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)('delete/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)

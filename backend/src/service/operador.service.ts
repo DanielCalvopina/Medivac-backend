@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Operador } from '../entity/Operador';
+import { CreateOperadorDto, UpdateOperadorDto, OperadorResponseDto } from '../dto/operador.dto';
 
 @Injectable()
 export class OperadorService {
@@ -10,50 +11,76 @@ export class OperadorService {
     private readonly repo: Repository<Operador>,
   ) {}
 
-  // Obtener todos los operadores
-  findAll() {
-    return this.repo.find();
+  // === MAPPER ===
+  private toResponseDto(entity: Operador): OperadorResponseDto {
+    return { ...entity } as OperadorResponseDto;
   }
 
-  // Buscar un operador por su CURP (opCed)
-  async findOne(opCed: string) {
+  // === FIND ALL ===
+  async findAll(): Promise<OperadorResponseDto[]> {
+    const list = await this.repo.find({ order: { createdAt: 'DESC' } });
+    return list.map((item) => this.toResponseDto(item));
+  }
+
+  // === FIND ONE ===
+  async findOne(opCed: string): Promise<OperadorResponseDto> {
     const item = await this.repo.findOne({ where: { opCed } });
-    if (!item) throw new NotFoundException('Operador no encontrado');
-    return item;
+    if (!item) throw new NotFoundException(`Operador ${opCed} no encontrado`);
+    return this.toResponseDto(item);
   }
 
-  // Crear un nuevo operador
-  async create(data: Partial<Operador>) {
-    // status por defecto
-    if (data.status === undefined || data.status === null) data.status = true as any;
-
-    // ⚡ Fechas automáticas
-    const now = new Date();
-    (data as any).createdAt = now;
-    (data as any).updatedAt = now;
-
-    // ⚡ Valor por defecto para opVerificate
-    if (!data.opVerificate || data.opVerificate.trim() === '') {
-      data.opVerificate = 'pendiente'; // o "verificado" si aplica
+  // === CREATE ===
+  async create(dto: CreateOperadorDto): Promise<OperadorResponseDto> {
+    const exists = await this.repo.findOne({ 
+      where: { opCed: dto.opCed }, 
+      withDeleted: true 
+    });
+    
+    if (exists) {
+        throw new ConflictException('El operador con esa cédula ya existe.');
     }
 
-    const entity = this.repo.create(data);
-    return this.repo.save(entity);
+    const entity = this.repo.create({
+      ...dto,
+      status: dto.status ?? true,
+    });
+
+    const saved = await this.repo.save(entity);
+    return this.toResponseDto(saved);
   }
 
-  // Actualizar un operador existente
-  async update(opCed: string, data: Partial<Operador>) {
-    await this.findOne(opCed);
-    (data as any).updatedAt = new Date();
+  // === UPDATE ===
+  async update(opCed: string, dto: UpdateOperadorDto): Promise<OperadorResponseDto> {
+    const entity = await this.repo.preload({
+      opCed,
+      ...dto,
+    });
 
-    await this.repo.update({ opCed } as any, data);
-    return this.findOne(opCed);
+    if (!entity) throw new NotFoundException('Operador no encontrado');
+    
+    const saved = await this.repo.save(entity);
+    return this.toResponseDto(saved);
   }
 
-  // Eliminar un operador
-  async remove(opCed: string) {
-    const res = await this.repo.delete({ opCed } as any);
-    if (!res.affected) throw new NotFoundException('Operador no encontrado');
+  // === TOGGLE STATUS ===
+  async toggleStatus(opCed: string): Promise<OperadorResponseDto> {
+    const operator = await this.repo.findOne({ where: { opCed } });
+    if (!operator) throw new NotFoundException('Operador no encontrado');
+
+    operator.status = !operator.status;
+    
+    const saved = await this.repo.save(operator);
+    return this.toResponseDto(saved);
+  }
+
+  // === REMOVE ===
+  async remove(opCed: string): Promise<{ deleted: true }> {
+    const result = await this.repo.softDelete(opCed);
+    
+    if (result.affected === 0) {
+      throw new NotFoundException('Operador no encontrado');
+    }
+
     return { deleted: true };
   }
 }

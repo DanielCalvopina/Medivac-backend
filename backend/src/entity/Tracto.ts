@@ -1,14 +1,26 @@
-import { Column, Entity, Index, OneToMany } from "typeorm";
+import {
+  Column,
+  Entity,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  OneToMany,
+} from "typeorm";
 import { DocTracto } from "./DocTracto";
 import { Mancuerna } from "./Mancuerna";
 
-@Index("tracto_pk", ["trPlc"], { unique: true })
-@Index("pk_tracto", ["trPlc"], { unique: true })
 @Entity("tracto", { schema: "public" })
 export class Tracto {
-  @Column("character varying", { primary: true, name: "tr_plc", length: 60 })
+  // ==========================
+  //      IDENTIFICADORES
+  // ==========================
+  @PrimaryColumn("character varying", { name: "tr_plc", length: 60 })
   trPlc: string;
 
+  // ==========================
+  //      DATOS TÉCNICOS
+  // ==========================
   @Column("character varying", { name: "tr_eco", length: 60 })
   trEco: string;
 
@@ -51,27 +63,35 @@ export class Tracto {
   @Column("character varying", { name: "tr_desc", length: 60 })
   trDesc: string;
 
-  @Column("character varying", { name: "tr_poliza_seguro", length: 60, nullable: true })
-  trPolizaSeguro: string | null;
+  @Column("character varying", { name: "tr_poliza_seguro", length: 60 })
+  trPolizaSeguro: string;
 
-  @Column("timestamp", { name: "tr_exp_poliza", nullable: true })
-  trExpPoliza: Date | null;
+  @Column("date", { name: "tr_exp_poliza_seguro" })
+  trExpPolizaSeguro: string;
 
-  @Column("integer", { name: "status" })
+  @Column("integer", { name: "status", default: 1 })
   status: number;
 
-  @Column("date", { name: "created_at" })
-  createdAt: string;
+  // ==========================
+  //        AUDITORÍA
+  // ==========================
+  @CreateDateColumn({ name: "created_at", type: "date" })
+  createdAt: Date;
 
-  @Column("date", { name: "updated_at", nullable: true })
-  updatedAt: string | null;
+  @UpdateDateColumn({ name: "updated_at", type: "date", nullable: true })
+  updatedAt: Date | null;
 
-  @Column("date", { name: "deleted_at", nullable: true })
-  deletedAt: string | null;
+  @DeleteDateColumn({ name: "deleted_at", type: "date", nullable: true })
+  deletedAt: Date | null;
 
-  @OneToMany(() => DocTracto, (docTracto) => docTracto.trPlc2)
+  // ==========================
+  //       RELACIONES
+  // ==========================
+  // CORRECCIÓN 1: Apuntar a la propiedad correcta en DocTracto (seguramente es trPlc)
+  @OneToMany(() => DocTracto, (docTracto) => docTracto.trPlc)
   docTractos: DocTracto[];
 
-  @OneToMany(() => Mancuerna, (mancuerna) => mancuerna.trPlc2)
+  // CORRECCIÓN 2: El error decía explícitamente "Did you mean 'trPlc'?"
+  @OneToMany(() => Mancuerna, (mancuerna) => mancuerna.trPlc)
   mancuernas: Mancuerna[];
 }

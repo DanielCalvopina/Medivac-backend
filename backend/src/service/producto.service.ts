@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Producto } from 'src/entity/Producto';
+import { Producto } from '../entity/Producto';
+import { CreateProductoDto, UpdateProductoDto, ProductoResponseDto } from '../dto/producto.dto';
 
 @Injectable()
 export class ProductoService {
@@ -10,68 +11,81 @@ export class ProductoService {
     private readonly productoRepo: Repository<Producto>,
   ) {}
 
-  private today(): string {
-    return new Date().toISOString().slice(0, 10);
+  // === MAPPER DINÁMICO ===
+  private toResponseDto(entity: Producto): ProductoResponseDto {
+    return { ...entity } as ProductoResponseDto;
   }
 
-  // =======================================================
-  //                        CREATE
-  // =======================================================
-  async create(data: any) {
-    const today = this.today();
-
-    if (!data.prdNombre || !data.prdDesc) {
-      throw new BadRequestException('Nombre y descripción del producto son requeridos.');
-    }
-
-    const producto = this.productoRepo.create({
-      ...data,
-      createdAt: today,
-      updatedAt: today,
-    });
-
-    return await this.productoRepo.save(producto);
+  // GET ALL
+  async findAll(): Promise<ProductoResponseDto[]> {
+    // Ordenamos por fecha de creación descendente
+    const items = await this.productoRepo.find({ order: { createdAt: 'DESC' } });
+    return items.map(item => this.toResponseDto(item));
   }
 
-  // =======================================================
-  //                        FIND ALL
-  // =======================================================
-  async findAll() {
-    return await this.productoRepo.find();
-  }
-
-  // =======================================================
-  //                        FIND ONE
-  // =======================================================
-  async findOne(id: number) {
+  // GET ONE
+  async findOne(id: number): Promise<ProductoResponseDto> {
     const producto = await this.productoRepo.findOne({ where: { prdId: id } });
-
     if (!producto) {
       throw new NotFoundException(`Producto con ID ${id} no encontrado.`);
     }
-
-    return producto;
+    return this.toResponseDto(producto);
   }
 
-  // =======================================================
-  //                        UPDATE
-  // =======================================================
-  async update(id: number, data: any) {
-    const producto = await this.findOne(id);
-    const today = this.today();
+  // CREATE
+  async create(dto: CreateProductoDto): Promise<ProductoResponseDto> {
+    // Validación de negocio: Min no puede ser mayor a Max
+    if (dto.prdMin > dto.prdMax) {
+      throw new BadRequestException('El valor mínimo (prdMin) no puede ser mayor que el máximo (prdMax).');
+    }
 
-    Object.assign(producto, data, { updatedAt: today });
+    const producto = this.productoRepo.create({
+      ...dto,
+      status: dto.status ?? true // Default true
+    });
 
-    return await this.productoRepo.save(producto);
+    const saved = await this.productoRepo.save(producto);
+    return this.toResponseDto(saved);
   }
 
-  // =======================================================
-  //                        DELETE
-  // =======================================================
-  async remove(id: number) {
-    const producto = await this.findOne(id);
-    await this.productoRepo.remove(producto);
+  // UPDATE
+  async update(id: number, dto: UpdateProductoDto): Promise<ProductoResponseDto> {
+    // Preload fusiona el DTO con la entidad existente basada en el ID
+    // Esto evita tener que hacer un findOne manual antes para obtener los valores actuales
+    const merged = await this.productoRepo.preload({
+      prdId: id,
+      ...dto,
+    });
+    
+    if (!merged) throw new NotFoundException(`Producto con ID ${id} no encontrado.`);
 
-    return { message: `Producto con ID ${id} eliminado correctamente.` };
+    // Validación de negocio cruzada (Valores nuevos vs Valores existentes/precargados)
+    // Como 'merged' ya tiene la combinación de lo viejo + lo nuevo, validamos directamente sobre 'merged'
+    if (merged.prdMin > merged.prdMax) {
+      throw new BadRequestException('Conflicto de rangos: El valor mínimo no puede ser mayor que el máximo.');
+    }
+
+    const saved = await this.productoRepo.save(merged);
+    return this.toResponseDto(saved);
+  }
+
+  // TOGGLE STATUS
+  async toggleStatus(id: number): Promise<ProductoResponseDto> {
+    const producto = await this.productoRepo.findOne({ where: { prdId: id } });
+    if (!producto) throw new NotFoundException(`Producto con ID ${id} no encontrado.`);
+    
+    producto.status = !producto.status;
+    
+    const saved = await this.productoRepo.save(producto);
+    return this.toResponseDto(saved);
+  }
+
+  // DELETE
+  async remove(id: number): Promise<{ deleted: true }> {
+    const res = await this.productoRepo.softDelete(id);
+    if (res.affected === 0) {
+      throw new NotFoundException(`Producto con ID ${id} no encontrado.`);
+    }
+    return { deleted: true };
   }
 }

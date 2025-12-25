@@ -14,7 +14,6 @@ const unidades_module_1 = require("./modules/unidades.module");
 const cliente_module_1 = require("./modules/cliente.module");
 const operador_module_1 = require("./modules/operador.module");
 const ubicacion_module_1 = require("./modules/ubicacion.module");
-const admin_module_1 = require("./modules/admin.module");
 const rutas_module_1 = require("./modules/rutas.module");
 const mancuerna_module_1 = require("./modules/mancuerna.module");
 const viajes_module_1 = require("./modules/viajes.module");
@@ -33,7 +32,6 @@ exports.AppModule = AppModule = __decorate([
             cliente_module_1.ClienteModule,
             operador_module_1.OperadorModule,
             ubicacion_module_1.UbicacionModule,
-            admin_module_1.AdminModule,
             rutas_module_1.RutasModule,
             mancuerna_module_1.MancuernaModule,
             viajes_module_1.ViajesModule,

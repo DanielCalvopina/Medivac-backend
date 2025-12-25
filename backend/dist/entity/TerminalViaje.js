@@ -26,34 +26,24 @@ __decorate([
     __metadata("design:type", Number)
 ], TerminalViaje.prototype, "etnsId6", void 0);
 __decorate([
-    (0, typeorm_1.Column)("integer", { name: "viaje_id", nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.Column)("integer", { name: "viaje_id" }),
+    __metadata("design:type", Number)
 ], TerminalViaje.prototype, "viajeId", void 0);
 __decorate([
-    (0, typeorm_1.Column)("integer", { name: "trm_id", nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.Column)("integer", { name: "trm_id" }),
+    __metadata("design:type", Number)
 ], TerminalViaje.prototype, "trmId", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Terminal_1.Terminal, (terminal) => terminal.terminalViajes, {
-        onDelete: "RESTRICT",
-        onUpdate: "RESTRICT",
-    }),
+    (0, typeorm_1.ManyToOne)(() => Terminal_1.Terminal, (terminal) => terminal.terminalViajes),
     (0, typeorm_1.JoinColumn)([{ name: "trm_id", referencedColumnName: "trmId" }]),
     __metadata("design:type", Terminal_1.Terminal)
 ], TerminalViaje.prototype, "trm", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Viaje_1.Viaje, (viaje) => viaje.terminalViajes, {
-        onDelete: "RESTRICT",
-        onUpdate: "RESTRICT",
-    }),
+    (0, typeorm_1.ManyToOne)(() => Viaje_1.Viaje, (viaje) => viaje.terminalViajes),
     (0, typeorm_1.JoinColumn)([{ name: "viaje_id", referencedColumnName: "viajeId" }]),
     __metadata("design:type", Viaje_1.Viaje)
 ], TerminalViaje.prototype, "viaje", void 0);
 exports.TerminalViaje = TerminalViaje = __decorate([
-    (0, typeorm_1.Index)("pk_terminal_viaje", ["etnsId6"], { unique: true }),
-    (0, typeorm_1.Index)("terminal_viaje_pk", ["etnsId6"], { unique: true }),
-    (0, typeorm_1.Index)("relationship_35_fk", ["trmId"], {}),
-    (0, typeorm_1.Index)("relationship_32_fk", ["viajeId"], {}),
     (0, typeorm_1.Entity)("terminal_viaje", { schema: "public" })
 ], TerminalViaje);
 //# sourceMappingURL=TerminalViaje.js.map

@@ -17,12 +17,12 @@ let RtFlId = class RtFlId {
     rtsVijId;
     viajeId;
     etnsId2;
-    etnsId;
+    ruta;
     viaje;
 };
 exports.RtFlId = RtFlId;
 __decorate([
-    (0, typeorm_1.Column)("integer", { primary: true, name: "rts_vij_id" }),
+    (0, typeorm_1.PrimaryGeneratedColumn)({ type: "integer", name: "rts_vij_id" }),
     __metadata("design:type", Number)
 ], RtFlId.prototype, "rtsVijId", void 0);
 __decorate([
@@ -34,26 +34,16 @@ __decorate([
     __metadata("design:type", Number)
 ], RtFlId.prototype, "etnsId2", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Rutas_1.Rutas, (rutas) => rutas.rtFlS, {
-        onDelete: "RESTRICT",
-        onUpdate: "RESTRICT",
-    }),
+    (0, typeorm_1.ManyToOne)(() => Rutas_1.Rutas, (rutas) => rutas.rtFlS),
     (0, typeorm_1.JoinColumn)([{ name: "etns_id2", referencedColumnName: "etnsId2" }]),
     __metadata("design:type", Rutas_1.Rutas)
-], RtFlId.prototype, "etnsId", void 0);
+], RtFlId.prototype, "ruta", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Viaje_1.Viaje, (viaje) => viaje.rtFlS, {
-        onDelete: "RESTRICT",
-        onUpdate: "RESTRICT",
-    }),
+    (0, typeorm_1.ManyToOne)(() => Viaje_1.Viaje, (viaje) => viaje.rtFlS),
     (0, typeorm_1.JoinColumn)([{ name: "viaje_id", referencedColumnName: "viajeId" }]),
     __metadata("design:type", Viaje_1.Viaje)
 ], RtFlId.prototype, "viaje", void 0);
 exports.RtFlId = RtFlId = __decorate([
-    (0, typeorm_1.Index)("relationship_28_fk", ["etnsId2"], {}),
-    (0, typeorm_1.Index)("rt_fl_id_pk", ["rtsVijId"], { unique: true }),
-    (0, typeorm_1.Index)("pk_rt_fl_id", ["rtsVijId"], { unique: true }),
-    (0, typeorm_1.Index)("relationship_27_fk", ["viajeId"], {}),
     (0, typeorm_1.Entity)("rt_fl_id", { schema: "public" })
 ], RtFlId);
 //# sourceMappingURL=RtFlId.js.map

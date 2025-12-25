@@ -1,26 +1,35 @@
 import { UnidadesService } from '../service/unidades.service';
+import { CreateTractoDto, UpdateTractoDto, TractoResponseDto } from '../dto/tracto.dto';
+import { CreateTanqueDto, UpdateTanqueDto, TanqueResponseDto } from '../dto/tanque.dto';
+import { CreateDollyDto, UpdateDollyDto, DollyResponseDto } from '../dto/dolly.dto';
+import { UnidadesItemsDto } from '../dto/unidades.dto';
+import { ChangeStatusDto } from '../dto/change-status.dto';
 export declare class UnidadesController {
     private readonly service;
     constructor(service: UnidadesService);
-    listTractos(): Promise<import("../entity/Tracto").Tracto[]>;
-    getTracto(trPlc: string): Promise<import("../entity/Tracto").Tracto>;
-    createTracto(body: any): Promise<import("../entity/Tracto").Tracto>;
-    updateTracto(trPlc: string, body: any): Promise<import("../entity/Tracto").Tracto>;
+    getUnidades(): Promise<UnidadesItemsDto>;
+    listTractos(): Promise<TractoResponseDto[]>;
+    getTracto(trPlc: string): Promise<TractoResponseDto>;
+    createTracto(body: CreateTractoDto): Promise<TractoResponseDto>;
+    updateTracto(trPlc: string, body: UpdateTractoDto): Promise<TractoResponseDto>;
+    changeTractoStatus(trPlc: string, body: ChangeStatusDto): Promise<TractoResponseDto>;
     deleteTracto(trPlc: string): Promise<{
-        deleted: boolean;
+        deleted: true;
     }>;
-    listTanques(): Promise<import("../entity/Tanque").Tanque[]>;
-    getTanque(tnqId: number): Promise<import("../entity/Tanque").Tanque>;
-    createTanque(body: any): Promise<import("../entity/Tanque").Tanque>;
-    updateTanque(tnqId: number, body: any): Promise<import("../entity/Tanque").Tanque>;
+    listTanques(): Promise<TanqueResponseDto[]>;
+    getTanque(tnqId: number): Promise<TanqueResponseDto>;
+    createTanque(body: CreateTanqueDto): Promise<TanqueResponseDto>;
+    updateTanque(tnqId: number, body: UpdateTanqueDto): Promise<TanqueResponseDto>;
+    changeTanqueStatus(tnqId: number, body: ChangeStatusDto): Promise<TanqueResponseDto>;
     deleteTanque(tnqId: number): Promise<{
-        deleted: boolean;
+        deleted: true;
     }>;
-    listDollies(): Promise<import("../entity/Dolly").Dolly[]>;
-    getDolly(id: string): Promise<import("../entity/Dolly").Dolly>;
-    createDolly(body: any): Promise<import("../entity/Dolly").Dolly>;
-    updateDolly(id: string, body: any): Promise<import("../entity/Dolly").Dolly>;
+    listDollies(): Promise<DollyResponseDto[]>;
+    getDolly(id: string): Promise<DollyResponseDto>;
+    createDolly(body: CreateDollyDto): Promise<DollyResponseDto>;
+    updateDolly(id: string, body: UpdateDollyDto): Promise<DollyResponseDto>;
+    changeDollyStatus(id: string, body: ChangeStatusDto): Promise<DollyResponseDto>;
     deleteDolly(id: string): Promise<{
-        deleted: boolean;
+        deleted: true;
     }>;
 }

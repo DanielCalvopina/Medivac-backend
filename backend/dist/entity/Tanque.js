@@ -100,27 +100,27 @@ __decorate([
     __metadata("design:type", String)
 ], Tanque.prototype, "tnqDesc", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "tnq_poliza_seguro", length: 60, nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.Column)("character varying", { name: "tnq_poliza_seguro", length: 60 }),
+    __metadata("design:type", String)
 ], Tanque.prototype, "tnqPolizaSeguro", void 0);
 __decorate([
-    (0, typeorm_1.Column)("timestamp", { name: "tnq_exp_poliza", nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.Column)("date", { name: "tnq_exp_poliza" }),
+    __metadata("design:type", String)
 ], Tanque.prototype, "tnqExpPoliza", void 0);
 __decorate([
-    (0, typeorm_1.Column)("integer", { name: "status" }),
+    (0, typeorm_1.Column)("integer", { name: "status", default: 1 }),
     __metadata("design:type", Number)
 ], Tanque.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "created_at" }),
-    __metadata("design:type", String)
+    (0, typeorm_1.CreateDateColumn)({ name: "created_at", type: "date" }),
+    __metadata("design:type", Date)
 ], Tanque.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "updated_at", nullable: true }),
+    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", type: "date", nullable: true }),
     __metadata("design:type", Object)
 ], Tanque.prototype, "updatedAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "deleted_at", nullable: true }),
+    (0, typeorm_1.DeleteDateColumn)({ name: "deleted_at", type: "date", nullable: true }),
     __metadata("design:type", Object)
 ], Tanque.prototype, "deletedAt", void 0);
 __decorate([
@@ -132,8 +132,6 @@ __decorate([
     __metadata("design:type", Array)
 ], Tanque.prototype, "mancTanqs", void 0);
 exports.Tanque = Tanque = __decorate([
-    (0, typeorm_1.Index)("tanque_pk", ["tnqId"], { unique: true }),
-    (0, typeorm_1.Index)("pk_tanque", ["tnqId"], { unique: true }),
     (0, typeorm_1.Entity)("tanque", { schema: "public" })
 ], Tanque);
 //# sourceMappingURL=Tanque.js.map

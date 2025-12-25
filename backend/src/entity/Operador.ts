@@ -1,14 +1,21 @@
-import { Column, Entity, Index, OneToMany } from "typeorm";
+import { 
+  Column, 
+  Entity, 
+  Index, 
+  OneToMany, 
+  CreateDateColumn, 
+  UpdateDateColumn, 
+  DeleteDateColumn 
+} from "typeorm";
 import { DocOp } from "./DocOp";
 import { Grupo } from "./Grupo";
-import { Mancuerna } from "./Mancuerna";
+import { MancOp } from "./MancOp";
 
-@Index("operador_pk", ["opCed"], { unique: true })
 @Index("pk_operador", ["opCed"], { unique: true })
 @Entity("operador", { schema: "public" })
 export class Operador {
   @Column("character varying", { primary: true, name: "op_ced", length: 30 })
-  opCed: string;
+  opCed: string; // [cite: 143]
 
   @Column("character varying", { name: "op_nombre", length: 60 })
   opNombre: string;
@@ -26,52 +33,44 @@ export class Operador {
   opNumLicencia: string;
 
   @Column("date", { name: "op_fc_venc_licencia" })
-  opFcVencLicencia: string;
+  opFcVencLicencia: Date | string; 
 
   @Column("date", { name: "op_fc_venc_dc3" })
-  opFcVencDc3: string;
+  opFcVencDc3: Date | string;
 
   @Column("date", { name: "op_fc_ven_cert_med" })
-  opFcVenCertMed: string;
+  opFcVenCertMed: Date | string;
 
-  @Column("boolean", { name: "status" })
-  status: boolean;
-
-  @Column("date", { name: "created_at" })
-  createdAt: string;
-
-  @Column("date", { name: "updated_at", nullable: true })
-  updatedAt: string | null;
-
-  @Column("date", { name: "deleted_at", nullable: true })
-  deletedAt: string | null;
-
-  @Column("character varying", {
-    name: "op_password",
-    nullable: true,
-    length: 255,
-  })
-  opPassword: string | null;
-
-  @Column("character varying", { name: "op_verificate", length: 60 })
-  opVerificate: string;
-
-  @Column("character varying", {
-    name: "op_code_ath",
-    nullable: true,
-    length: 60,
-  })
-  opCodeAth: string | null;
+  @Column("boolean", { name: "status", default: true })
+  status: boolean; // [cite: 145]
 
   @Column("date", { name: "op_time_to_exp", nullable: true })
-  opTimeToExp: string | null;
+  opTimeToExp: Date | string | null;
 
-  @OneToMany(() => DocOp, (docOp) => docOp.opCed2)
+  // --- AUDITORÍA AUTOMÁTICA ---
+  @CreateDateColumn({ name: "created_at", type: 'date' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: "updated_at", type: 'date', nullable: true })
+  updatedAt: Date | null;
+
+  @DeleteDateColumn({ name: "deleted_at", type: 'date', nullable: true })
+  deletedAt: Date | null;
+
+  // --- RELACIONES CORREGIDAS ---
+  
+  // 1. Relación con DocOp (Tabla DOC_OP tiene FK OP_CED) [cite: 235]
+  // Se asume que en DocOp.ts la propiedad @ManyToOne se llama 'opCed'
+  @OneToMany(() => DocOp, (docOp) => docOp.opCed) 
   docOps: DocOp[];
 
-  @OneToMany(() => Grupo, (grupo) => grupo.opCed2)
+  // 2. Relación con Grupo (Tabla GRUPO tiene FK OP_CED) [cite: 245]
+  // Se asume que en Grupo.ts la propiedad @ManyToOne se llama 'opCed'
+  @OneToMany(() => Grupo, (grupo) => grupo.opCed)
   grupos: Grupo[];
 
-  @OneToMany(() => Mancuerna, (mancuerna) => mancuerna.opCed2)
-  mancuernas: Mancuerna[];
+  // 3. Relación con MancOp (Tabla MANC_OP tiene FK OP_CED) [cite: 248]
+  // El error específico indicaba que opCed2 no existe, cambiamos a opCed
+  @OneToMany(() => MancOp, (mancOp) => mancOp.opCed)
+  mancOps: MancOp[];
 }

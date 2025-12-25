@@ -22,41 +22,58 @@ let ProductoService = class ProductoService {
     constructor(productoRepo) {
         this.productoRepo = productoRepo;
     }
-    today() {
-        return new Date().toISOString().slice(0, 10);
-    }
-    async create(data) {
-        const today = this.today();
-        if (!data.prdNombre || !data.prdDesc) {
-            throw new common_1.BadRequestException('Nombre y descripción del producto son requeridos.');
-        }
-        const producto = this.productoRepo.create({
-            ...data,
-            createdAt: today,
-            updatedAt: today,
-        });
-        return await this.productoRepo.save(producto);
+    toResponseDto(entity) {
+        return { ...entity };
     }
     async findAll() {
-        return await this.productoRepo.find();
+        const items = await this.productoRepo.find({ order: { createdAt: 'DESC' } });
+        return items.map(item => this.toResponseDto(item));
     }
     async findOne(id) {
         const producto = await this.productoRepo.findOne({ where: { prdId: id } });
         if (!producto) {
             throw new common_1.NotFoundException(`Producto con ID ${id} no encontrado.`);
         }
-        return producto;
+        return this.toResponseDto(producto);
     }
-    async update(id, data) {
-        const producto = await this.findOne(id);
-        const today = this.today();
-        Object.assign(producto, data, { updatedAt: today });
-        return await this.productoRepo.save(producto);
+    async create(dto) {
+        if (dto.prdMin > dto.prdMax) {
+            throw new common_1.BadRequestException('El valor mínimo (prdMin) no puede ser mayor que el máximo (prdMax).');
+        }
+        const producto = this.productoRepo.create({
+            ...dto,
+            status: dto.status ?? true
+        });
+        const saved = await this.productoRepo.save(producto);
+        return this.toResponseDto(saved);
+    }
+    async update(id, dto) {
+        const merged = await this.productoRepo.preload({
+            prdId: id,
+            ...dto,
+        });
+        if (!merged)
+            throw new common_1.NotFoundException(`Producto con ID ${id} no encontrado.`);
+        if (merged.prdMin > merged.prdMax) {
+            throw new common_1.BadRequestException('Conflicto de rangos: El valor mínimo no puede ser mayor que el máximo.');
+        }
+        const saved = await this.productoRepo.save(merged);
+        return this.toResponseDto(saved);
+    }
+    async toggleStatus(id) {
+        const producto = await this.productoRepo.findOne({ where: { prdId: id } });
+        if (!producto)
+            throw new common_1.NotFoundException(`Producto con ID ${id} no encontrado.`);
+        producto.status = !producto.status;
+        const saved = await this.productoRepo.save(producto);
+        return this.toResponseDto(saved);
     }
     async remove(id) {
-        const producto = await this.findOne(id);
-        await this.productoRepo.remove(producto);
-        return { message: `Producto con ID ${id} eliminado correctamente.` };
+        const res = await this.productoRepo.softDelete(id);
+        if (res.affected === 0) {
+            throw new common_1.NotFoundException(`Producto con ID ${id} no encontrado.`);
+        }
+        return { deleted: true };
     }
 };
 exports.ProductoService = ProductoService;
