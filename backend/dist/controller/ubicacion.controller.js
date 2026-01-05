@@ -15,30 +15,70 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UbicacionController = void 0;
 const common_1 = require("@nestjs/common");
 const ubicacion_service_1 = require("../service/ubicacion.service");
+const estaciones_dto_1 = require("../dto/estaciones.dto");
+const terminal_dto_1 = require("../dto/terminal.dto");
+const ubicacion_dto_1 = require("../dto/ubicacion.dto");
 let UbicacionController = class UbicacionController {
     svc;
     constructor(svc) {
         this.svc = svc;
     }
-    listEstaciones() { return this.svc.listEstaciones(); }
-    getEstacion(etnsId) { return this.svc.getEstacion(etnsId); }
-    createEstacion(body) { return this.svc.createEstacion(body); }
+    getUbicaciones() {
+        return this.svc.getUbicaciones();
+    }
+    estacionesConClientes() {
+        return this.svc.estacionesConClientes();
+    }
+    terminalesConClientes() {
+        return this.svc.terminalesConClientes();
+    }
+    listEstaciones() {
+        return this.svc.listEstaciones();
+    }
+    getEstacion(etnsId) {
+        return this.svc.getEstacion(etnsId);
+    }
+    createEstacion(body) {
+        return this.svc.createEstacion(body);
+    }
     updateEstacion(etnsId, body) {
         return this.svc.updateEstacion(etnsId, body);
     }
-    deleteEstacion(etnsId) { return this.svc.deleteEstacion(etnsId); }
-    listTerminales() { return this.svc.listTerminales(); }
-    getTerminal(trmId) { return this.svc.getTerminal(trmId); }
-    createTerminal(body) { return this.svc.createTerminal(body); }
+    toggleEstacionStatus(etnsId) {
+        return this.svc.toggleEstacionStatus(etnsId);
+    }
+    deleteEstacion(etnsId) {
+        return this.svc.deleteEstacion(etnsId);
+    }
+    listTerminales() {
+        return this.svc.listTerminales();
+    }
+    getTerminal(trmId) {
+        return this.svc.getTerminal(trmId);
+    }
+    createTerminal(body) {
+        return this.svc.createTerminal(body);
+    }
     updateTerminal(trmId, body) {
         return this.svc.updateTerminal(trmId, body);
     }
-    deleteTerminal(trmId) { return this.svc.deleteTerminal(trmId); }
+    toggleTerminalStatus(trmId) {
+        return this.svc.toggleTerminalStatus(trmId);
+    }
+    deleteTerminal(trmId) {
+        return this.svc.deleteTerminal(trmId);
+    }
     vincularEstacionCliente(body) {
-        return this.svc.vincularEstacionCliente(Number(body.etnsId), Number(body.cliId));
+        return this.svc.vincularEstacionCliente({
+            etnsId: Number(body.etnsId),
+            cliId: Number(body.cliId),
+        });
     }
     vincularTerminalCliente(body) {
-        return this.svc.vincularTerminalCliente(Number(body.trmId), Number(body.cliId));
+        return this.svc.vincularTerminalCliente({
+            trmId: Number(body.trmId),
+            cliId: Number(body.cliId),
+        });
     }
     estacionesPorCliente(cliId) {
         return this.svc.estacionesPorCliente(cliId);
@@ -46,14 +86,26 @@ let UbicacionController = class UbicacionController {
     terminalesPorCliente(cliId) {
         return this.svc.terminalesPorCliente(cliId);
     }
-    clientesPorEstacion(etnsId) {
-        return this.svc.clientesPorEstacion(etnsId);
-    }
-    clientesPorTerminal(trmId) {
-        return this.svc.clientesPorTerminal(trmId);
-    }
 };
 exports.UbicacionController = UbicacionController;
+__decorate([
+    (0, common_1.Get)('getUbicaciones'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UbicacionController.prototype, "getUbicaciones", null);
+__decorate([
+    (0, common_1.Get)('estaciones-con-clientes'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], UbicacionController.prototype, "estacionesConClientes", null);
+__decorate([
+    (0, common_1.Get)('terminales-con-clientes'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], UbicacionController.prototype, "terminalesConClientes", null);
 __decorate([
     (0, common_1.Get)('estaciones'),
     __metadata("design:type", Function),
@@ -71,7 +123,7 @@ __decorate([
     (0, common_1.Post)('estaciones'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [estaciones_dto_1.CreateEstacionesDto]),
     __metadata("design:returntype", void 0)
 ], UbicacionController.prototype, "createEstacion", null);
 __decorate([
@@ -79,9 +131,16 @@ __decorate([
     __param(0, (0, common_1.Param)('etnsId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:paramtypes", [Number, estaciones_dto_1.UpdateEstacionesDto]),
     __metadata("design:returntype", void 0)
 ], UbicacionController.prototype, "updateEstacion", null);
+__decorate([
+    (0, common_1.Patch)('estaciones/:etnsId/toggle-status'),
+    __param(0, (0, common_1.Param)('etnsId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], UbicacionController.prototype, "toggleEstacionStatus", null);
 __decorate([
     (0, common_1.Delete)('estaciones/:etnsId'),
     __param(0, (0, common_1.Param)('etnsId', common_1.ParseIntPipe)),
@@ -106,7 +165,7 @@ __decorate([
     (0, common_1.Post)('terminales'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [terminal_dto_1.CreateTerminalDto]),
     __metadata("design:returntype", void 0)
 ], UbicacionController.prototype, "createTerminal", null);
 __decorate([
@@ -114,9 +173,16 @@ __decorate([
     __param(0, (0, common_1.Param)('trmId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:paramtypes", [Number, terminal_dto_1.UpdateTerminalDto]),
     __metadata("design:returntype", void 0)
 ], UbicacionController.prototype, "updateTerminal", null);
+__decorate([
+    (0, common_1.Patch)('terminales/:trmId/toggle-status'),
+    __param(0, (0, common_1.Param)('trmId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], UbicacionController.prototype, "toggleTerminalStatus", null);
 __decorate([
     (0, common_1.Delete)('terminales/:trmId'),
     __param(0, (0, common_1.Param)('trmId', common_1.ParseIntPipe)),
@@ -128,14 +194,14 @@ __decorate([
     (0, common_1.Post)('vinculos/estacion-cliente'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [ubicacion_dto_1.VinculoEstacionClienteDto]),
     __metadata("design:returntype", void 0)
 ], UbicacionController.prototype, "vincularEstacionCliente", null);
 __decorate([
     (0, common_1.Post)('vinculos/terminal-cliente'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [ubicacion_dto_1.VinculoTerminalClienteDto]),
     __metadata("design:returntype", void 0)
 ], UbicacionController.prototype, "vincularTerminalCliente", null);
 __decorate([
@@ -152,20 +218,6 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], UbicacionController.prototype, "terminalesPorCliente", null);
-__decorate([
-    (0, common_1.Get)('estaciones/:etnsId/clientes'),
-    __param(0, (0, common_1.Param)('etnsId', common_1.ParseIntPipe)),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
-    __metadata("design:returntype", void 0)
-], UbicacionController.prototype, "clientesPorEstacion", null);
-__decorate([
-    (0, common_1.Get)('terminales/:trmId/clientes'),
-    __param(0, (0, common_1.Param)('trmId', common_1.ParseIntPipe)),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
-    __metadata("design:returntype", void 0)
-], UbicacionController.prototype, "clientesPorTerminal", null);
 exports.UbicacionController = UbicacionController = __decorate([
     (0, common_1.Controller)('ubicaciones'),
     __metadata("design:paramtypes", [ubicacion_service_1.UbicacionService])

@@ -6,14 +6,15 @@ import { UnidadesModule } from './modules/unidades.module';
 import { ClienteModule } from './modules/cliente.module';
 import { OperadorModule } from './modules/operador.module';
 import { UbicacionModule } from './modules/ubicacion.module';
-import { AdminModule } from './modules/admin.module';
 import { RutasModule } from './modules/rutas.module';
 import { MancuernaModule } from './modules/mancuerna.module';
 import { ViajesModule } from './modules/viajes.module';
-import { Bitacora } from './entity/Bitacora';
+import { BitacoraModule } from './modules/bitacora.module';
 import { FolioModule } from './modules/folio.module';
 import { ProductoModule } from './modules/producto.module';
 import { FilesModule } from './modules/files.module';
+import { CargaModule } from './modules/carga.module';
+import { DescargaModule } from './modules/descarga.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeOrmConfig),
@@ -21,15 +22,15 @@ import { FilesModule } from './modules/files.module';
     ClienteModule,
     OperadorModule,
     UbicacionModule,
-    AdminModule,
     RutasModule,
     MancuernaModule,
     ViajesModule,
-    Bitacora,
+    BitacoraModule,
     FolioModule,
     ProductoModule,
-    FilesModule
-
+    FilesModule,
+    CargaModule,
+    DescargaModule
   ],
   providers: [],
   controllers: [],

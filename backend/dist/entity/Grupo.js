@@ -60,8 +60,8 @@ __decorate([
     __metadata("design:type", Operador_1.Operador)
 ], Grupo.prototype, "opCed2", void 0);
 exports.Grupo = Grupo = __decorate([
-    (0, typeorm_1.Index)("grupo_pk", ["attribute_34"], { unique: true }),
     (0, typeorm_1.Index)("pk_grupo", ["attribute_34"], { unique: true }),
+    (0, typeorm_1.Index)("grupo_pk", ["attribute_34"], { unique: true }),
     (0, typeorm_1.Index)("relationship_30_fk", ["opCed"], {}),
     (0, typeorm_1.Entity)("grupo", { schema: "public" })
 ], Grupo);

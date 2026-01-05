@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClientesController = void 0;
 const common_1 = require("@nestjs/common");
 const cliente_service_1 = require("../service/cliente.service");
+const cliente_dto_1 = require("../dto/cliente.dto");
 let ClientesController = class ClientesController {
     service;
     constructor(service) {
@@ -32,8 +33,11 @@ let ClientesController = class ClientesController {
     update(cliId, body) {
         return this.service.update(cliId, body);
     }
-    remove(cliId) {
-        return this.service.remove(cliId);
+    toggleStatus(cliId) {
+        return this.service.toggleStatus(cliId);
+    }
+    async remove(cliId) {
+        await this.service.remove(cliId);
     }
 };
 exports.ClientesController = ClientesController;
@@ -41,36 +45,44 @@ __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], ClientesController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':cliId'),
     __param(0, (0, common_1.Param)('cliId', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], ClientesController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [cliente_dto_1.CreateClienteDto]),
+    __metadata("design:returntype", Promise)
 ], ClientesController.prototype, "create", null);
 __decorate([
     (0, common_1.Patch)(':cliId'),
     __param(0, (0, common_1.Param)('cliId', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Number, cliente_dto_1.UpdateClienteDto]),
+    __metadata("design:returntype", Promise)
 ], ClientesController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)(':cliId'),
+    (0, common_1.Patch)(':cliId/toggle-status'),
     __param(0, (0, common_1.Param)('cliId', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
+], ClientesController.prototype, "toggleStatus", null);
+__decorate([
+    (0, common_1.Delete)(':cliId'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
+    __param(0, (0, common_1.Param)('cliId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
 ], ClientesController.prototype, "remove", null);
 exports.ClientesController = ClientesController = __decorate([
     (0, common_1.Controller)('clientes'),

@@ -1,12 +1,14 @@
 import { ProductoService } from '../service/producto.service';
+import { CreateProductoDto, UpdateProductoDto, ProductoResponseDto } from '../dto/producto.dto';
 export declare class ProductoController {
     private readonly productoService;
     constructor(productoService: ProductoService);
-    create(body: any): Promise<import("../entity/Producto").Producto[]>;
-    findAll(): Promise<import("../entity/Producto").Producto[]>;
-    findOne(id: string): Promise<import("../entity/Producto").Producto>;
-    update(id: string, body: any): Promise<import("../entity/Producto").Producto>;
-    remove(id: string): Promise<{
-        message: string;
+    findAll(): Promise<ProductoResponseDto[]>;
+    findOne(id: number): Promise<ProductoResponseDto>;
+    create(body: CreateProductoDto): Promise<ProductoResponseDto>;
+    update(id: number, body: UpdateProductoDto): Promise<ProductoResponseDto>;
+    toggleStatus(id: number): Promise<ProductoResponseDto>;
+    remove(id: number): Promise<{
+        deleted: true;
     }>;
 }

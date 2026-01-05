@@ -55,19 +55,19 @@ __decorate([
     __metadata("design:type", String)
 ], Cliente.prototype, "cliRuc", void 0);
 __decorate([
-    (0, typeorm_1.Column)("boolean", { name: "status" }),
+    (0, typeorm_1.Column)("boolean", { name: "status", default: true }),
     __metadata("design:type", Boolean)
 ], Cliente.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "created_at" }),
-    __metadata("design:type", String)
+    (0, typeorm_1.CreateDateColumn)({ name: "created_at", type: 'date', default: () => 'CURRENT_DATE' }),
+    __metadata("design:type", Date)
 ], Cliente.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "updated_at", nullable: true }),
+    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", type: 'date', nullable: true, default: () => 'CURRENT_DATE' }),
     __metadata("design:type", Object)
 ], Cliente.prototype, "updatedAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "deleted_at", nullable: true }),
+    (0, typeorm_1.DeleteDateColumn)({ name: "deleted_at", type: 'date', nullable: true }),
     __metadata("design:type", Object)
 ], Cliente.prototype, "deletedAt", void 0);
 __decorate([
@@ -83,8 +83,6 @@ __decorate([
     __metadata("design:type", Array)
 ], Cliente.prototype, "viajes", void 0);
 exports.Cliente = Cliente = __decorate([
-    (0, typeorm_1.Index)("cliente_pk", ["cliId"], { unique: true }),
-    (0, typeorm_1.Index)("pk_cliente", ["cliId"], { unique: true }),
     (0, typeorm_1.Entity)("cliente", { schema: "public" })
 ], Cliente);
 //# sourceMappingURL=Cliente.js.map

@@ -14,13 +14,12 @@ const cliente_service_1 = require("../service/cliente.service");
 const cliente_controller_1 = require("../controller/cliente.controller");
 const operador_module_1 = require("./operador.module");
 const ubicacion_module_1 = require("./ubicacion.module");
-const admin_module_1 = require("./admin.module");
 let ClienteModule = class ClienteModule {
 };
 exports.ClienteModule = ClienteModule;
 exports.ClienteModule = ClienteModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([Cliente_1.Cliente]), operador_module_1.OperadorModule, ubicacion_module_1.UbicacionModule, admin_module_1.AdminModule],
+        imports: [typeorm_1.TypeOrmModule.forFeature([Cliente_1.Cliente]), operador_module_1.OperadorModule, ubicacion_module_1.UbicacionModule],
         controllers: [cliente_controller_1.ClientesController],
         providers: [cliente_service_1.ClienteService],
         exports: [cliente_service_1.ClienteService],

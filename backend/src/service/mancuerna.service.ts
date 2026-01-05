@@ -1,10 +1,6 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, In, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { Mancuerna } from '../entity/Mancuerna';
 import { Tracto } from '../entity/Tracto';
@@ -12,257 +8,287 @@ import { Tanque } from '../entity/Tanque';
 import { Dolly } from '../entity/Dolly';
 import { Operador } from '../entity/Operador';
 import { MancTanq } from '../entity/MancTanq';
+import { MancOp } from '../entity/MancOp'; 
 
-type CreateOrUpdateMancuerna = Partial<Mancuerna> & {
-  tanquesIds?: (number | string)[];
-  tractoId?: string;
-  operadorId?: string;
-  tanque1Id?: number | string;
-  tanque2Id?: number | string;
-  mncCodigo?: string;
-  mncDesc?: string;
-  trPlc?: string;
-  opCed?: string;
-  mncNom?: string;
-  npmcDesc?: string;
-  dollyId?: string | number | null;
-};
+import {
+  CreateMancuernaDto,
+  MancuernaItemsDto,
+  MancuernaItemDto,
+  MancuernaResponseDto,
+  MancOpResponseDto,
+} from '../dto/mancuerna.dto';
+import { OperadorResponseDto } from '../dto/operador.dto';
+import { TanqueResponseDto } from '../dto/tanque.dto';
+import { TractoResponseDto } from '../dto/tracto.dto';
+import { DollyResponseDto } from '../dto/dolly.dto';
 
 @Injectable()
 export class MancuernaService {
   constructor(
     @InjectRepository(Mancuerna) private readonly mancuernaRepo: Repository<Mancuerna>,
-    @InjectRepository(Tracto)    private readonly tractoRepo: Repository<Tracto>,
-    @InjectRepository(Tanque)    private readonly tanqueRepo: Repository<Tanque>,
-    @InjectRepository(Dolly)     private readonly dollyRepo: Repository<Dolly>,
-    @InjectRepository(Operador)  private readonly operadorRepo: Repository<Operador>,
-    @InjectRepository(MancTanq)  private readonly mancTanqRepo: Repository<MancTanq>,
+    @InjectRepository(Tracto) private readonly tractoRepo: Repository<Tracto>,
+    @InjectRepository(Dolly) private readonly dollyRepo: Repository<Dolly>,
+    @InjectRepository(Tanque) private readonly tanqueRepo: Repository<Tanque>,
+    @InjectRepository(Operador) private readonly opRepo: Repository<Operador>,
+    @InjectRepository(MancTanq) private readonly mancTanqRepo: Repository<MancTanq>,
+    @InjectRepository(MancOp) private readonly mancOpRepo: Repository<MancOp>,
   ) {}
 
-  private todayStr(): string {
-    return new Date().toISOString().slice(0, 10);
+  // ==========================
+  //      HELPER: MAPPER
+  // ==========================
+  private toResponseDto(m: Mancuerna): MancuernaResponseDto {
+    // 1. Mapear Tanques desde la relación intermedia
+    const tanquesDtos = (m.mancTanqs || [])
+      .map((mt) => mt.tnq)
+      .filter((t) => !!t)
+      .map((t) => ({ ...t } as TanqueResponseDto));
+
+    // 2. Mapear Historial de Operadores desde MancOp
+    // Ordenamos por fecha para que el más reciente salga primero o ultimo según prefieras
+    const historialRaw = m.mancOps || [];
+    
+    const historial: MancOpResponseDto[] = historialRaw.map(mo => ({
+      mancOpId: mo.mancOpId,
+      fechaAsignacion: mo.createdAt,
+      fechaTermino: mo.deletedAt,
+      operador: { ...mo.operador } as OperadorResponseDto
+    }));
+
+    // 3. Determinar Operador ACTUAL
+    // Es aquel registro en MancOp que NO tiene fecha de borrado (deletedAt === null)
+    // y cuyo status es true (si usas esa bandera)
+    const activeLog = historialRaw.find(mo => !mo.deletedAt); 
+    const operadorActual = activeLog && activeLog.operador 
+      ? ({ ...activeLog.operador } as OperadorResponseDto) 
+      : null;
+
+    return {
+      mncId: m.mncId,
+      mncNom: m.mncNom,
+      npmcDesc: m.npmcDesc,
+      status: m.status,
+      createdAt: m.createdAt,
+      updatedAt: m.updatedAt,
+      // Relaciones directas
+      tracto: m.tracto ? ({ ...m.tracto } as TractoResponseDto) : null,
+      dolly: m.dolly ? ({ ...m.dolly } as DollyResponseDto) : null,
+      // Datos calculados
+      operadorActual: operadorActual,
+      tanques: tanquesDtos,
+      historialOperadores: historial
+    } as any; // Cast any si faltan propiedades menores en el DTO
   }
 
-  // ============================================================
-  //        Obtener tanques asociados a UNA mancuerna
-  // ============================================================
-  private async getTanquesPorMancuerna(mncId: number): Promise<Tanque[]> {
-    const links = await this.mancTanqRepo.find({
-      where: { mncId },
-      order: { mncTanqId: 'ASC' },
-    });
+  // ==========================
+  //    LOGICA DE ESTADOS
+  // ==========================
 
-    if (!links.length) return [];
-
-    // Filtrar null y asegurar tipo number
-    const tnqIds = links
-      .map(l => l.tnqId)
-      .filter((id): id is number => id !== null);
-
-    if (!tnqIds.length) return [];
-
-    const tanques = await this.tanqueRepo.find({
-      where: { tnqId: In(tnqIds) },
-    });
-
-    const map = new Map(tanques.map(t => [t.tnqId, t]));
-
-    return tnqIds
-      .map(id => map.get(id))
-      .filter((t): t is Tanque => Boolean(t));
-  }
-
-  // ============================================================
-  //        Obtener tanques asociados a VARIAS mancuernas
-  // ============================================================
-  private async getTanquesPorMancuernas(mncIds: number[]): Promise<Map<number, Tanque[]>> {
-    const out = new Map<number, Tanque[]>();
-    if (!mncIds.length) return out;
-
-    const links = await this.mancTanqRepo.find({
-      where: { mncId: In(mncIds) },
-      order: { mncTanqId: 'ASC' },
-    });
-
-    if (!links.length) return out;
-
-    const allTnqIds = links
-      .map(l => l.tnqId)
-      .filter((id): id is number => id !== null);
-
-    const tanques = await this.tanqueRepo.find({
-      where: { tnqId: In(allTnqIds) },
-    });
-
-    const mapT = new Map(tanques.map(t => [t.tnqId, t]));
-
-    for (const l of links) {
-      if (l.tnqId === null) continue;
-
-      const arr = out.get(l.mncId!) ?? [];
-      const t = mapT.get(l.tnqId);
-      if (t) arr.push(t);
-      out.set(l.mncId!, arr);
-    }
-
-    return out;
-  }
-
-  // ============================================================
-  //                          CREATE
-  // ============================================================
-  async create(payload: CreateOrUpdateMancuerna) {
-    const today = this.todayStr();
-
-    const trPlc = payload.trPlc ?? payload.tractoId;
-    const opCed = payload.opCed ?? payload.operadorId;
-
-    if (!trPlc) throw new BadRequestException('trPlc es requerido');
-    if (payload.dollyId === undefined) throw new BadRequestException('dollyId es requerido');
-
-    const tracto = await this.tractoRepo.findOne({ where: { trPlc } });
-    if (!tracto) throw new NotFoundException(`Tracto ${trPlc} no existe`);
-
-    const dol = await this.dollyRepo.findOne({ where: { dollyId: payload.dollyId } });
-    if (!dol) throw new NotFoundException(`Dolly ${payload.dollyId} no existe`);
-
-    if (opCed) {
-      const op = await this.operadorRepo.findOne({ where: { opCed } });
-      if (!op) throw new NotFoundException(`Operador ${opCed} no existe`);
-    }
-
-    const incoming =
-      payload.tanquesIds ??
-      [payload.tanque1Id, payload.tanque2Id].filter(Boolean);
-
-    const tanquesIds = Array.from(
-      new Set((incoming ?? []).map(v => Number(v)).filter(v => !isNaN(v)))
-    );
-
-    const dto: DeepPartial<Mancuerna> = {
-      trPlc,
-      opCed: opCed ?? null,
-      dollyId: payload.dollyId,
-      mncNom: payload.mncNom ?? payload.mncCodigo ?? `MNC-${trPlc}`,
-      npmcDesc: payload.npmcDesc ?? payload.mncDesc ?? '',
-      status: payload.status ?? 1,
-      createdAt: today,
-      updatedAt: today,
-    };
-
-    const mancu = await this.mancuernaRepo.save(this.mancuernaRepo.create(dto));
-
+  private async ocuparComponentes(trPlc: string, dollyId: string, tanquesIds: number[], opCed: string) {
+    await this.tractoRepo.update(trPlc, { status: 2 });
+    await this.dollyRepo.update(dollyId, { status: 2 });
     if (tanquesIds.length) {
-      const rows = tanquesIds.map(tnqId =>
-        this.mancTanqRepo.create({ mncId: mancu.mncId, tnqId })
-      );
-      await this.mancTanqRepo.save(rows);
+      await this.tanqueRepo.update({ tnqId: In(tanquesIds) }, { status: 2 });
     }
-
-    const tanques = await this.getTanquesPorMancuerna(mancu.mncId);
-    return { ...mancu, tanques, tanque1: tanques[0] ?? null, tanque2: tanques[1] ?? null };
+    // El operador pasa a false (Ocupado)
+    await this.opRepo.update(opCed, { status: false }); 
   }
 
-  // ============================================================
-  //                          READ ALL
-  // ============================================================
-  async findAll() {
-    const base = await this.mancuernaRepo.find({
-      relations: ['trPlc2', 'dolly', 'opCed2'],
-      order: { mncId: 'ASC' },
-    });
-
-    const byId = await this.getTanquesPorMancuernas(base.map(b => b.mncId));
-
-    return base.map(m => {
-      const tanques = byId.get(m.mncId) ?? [];
-      return { ...m, tanques, tanque1: tanques[0] ?? null, tanque2: tanques[1] ?? null };
-    });
+  private async liberarComponentes(trPlc: string, dollyId: string, tanquesIds: number[]) {
+    await this.tractoRepo.update(trPlc, { status: 1 });
+    await this.dollyRepo.update(dollyId, { status: 1 });
+    if (tanquesIds.length) {
+      await this.tanqueRepo.update({ tnqId: In(tanquesIds) }, { status: 1 });
+    }
+    // Nota: El operador se libera (true) buscando cual estaba activo en 'desarmar'
   }
 
-  // ============================================================
-  //                          READ ONE
-  // ============================================================
-  async findOne(id: number) {
-    const mancu = await this.mancuernaRepo.findOne({
-      where: { mncId: id },
-      relations: ['trPlc2', 'dolly', 'opCed2'],
-    });
+  private async validarDisponibilidad(trPlc: string, dollyId: string, tanquesIds: number[], opCed: string) {
+    const tr = await this.tractoRepo.findOneBy({ trPlc });
+    if (!tr || tr.status !== 1) throw new ConflictException(`Tracto ${trPlc} no disponible`);
 
-    if (!mancu) throw new NotFoundException(`Mancuerna ${id} no encontrada`);
+    const dl = await this.dollyRepo.findOneBy({ dollyId });
+    if (!dl || dl.status !== 1) throw new ConflictException(`Dolly ${dollyId} no disponible`);
 
-    const tanques = await this.getTanquesPorMancuerna(id);
+    const op = await this.opRepo.findOneBy({ opCed });
+    if (!op) throw new NotFoundException(`Operador ${opCed} no existe`);
+    if (op.status === false) throw new ConflictException(`Operador ${opCed} ya está ocupado`);
 
-    return { ...mancu, tanques, tanque1: tanques[0] ?? null, tanque2: tanques[1] ?? null };
-  }
-
-  // ============================================================
-  //                          UPDATE
-  // ============================================================
-  async update(id: number, payload: CreateOrUpdateMancuerna) {
-    const today = this.todayStr();
-
-    await this.findOne(id);
-
-    const trPlc = payload.trPlc ?? payload.tractoId;
-    const opCed = payload.opCed ?? payload.operadorId;
-
-    const incoming =
-      payload.tanquesIds ??
-      [payload.tanque1Id, payload.tanque2Id].filter(Boolean);
-
-    const tanquesIds = Array.from(
-      new Set((incoming ?? []).map(v => Number(v)).filter(v => !isNaN(v)))
-    );
-
-    const tanksProvided =
-      'tanquesIds' in payload ||
-      'tanque1Id' in payload ||
-      'tanque2Id' in payload;
-
-    const patch: DeepPartial<Mancuerna> = {
-      ...(trPlc ? { trPlc } : {}),
-      ...(opCed !== undefined ? { opCed } : {}),
-      ...(payload.dollyId !== undefined ? { dollyId: payload.dollyId } : {}),
-      ...(payload.mncNom !== undefined ? { mncNom: payload.mncNom } : {}),
-      ...(payload.npmcDesc !== undefined ? { npmcDesc: payload.npmcDesc } : {}),
-      ...(payload.status !== undefined ? { status: payload.status } : {}),
-      updatedAt: today,
-    };
-
-    await this.mancuernaRepo.update(id, patch);
-
-    if (tanksProvided) {
-      await this.mancTanqRepo.delete({ mncId: id });
-
-      if (tanquesIds.length) {
-        const rows = tanquesIds.map(tnqId =>
-          this.mancTanqRepo.create({ mncId: id, tnqId })
-        );
-        await this.mancTanqRepo.save(rows);
+    if (tanquesIds.length > 0) {
+      const tqs = await this.tanqueRepo.find({ where: { tnqId: In(tanquesIds) } });
+      if (tqs.length !== tanquesIds.length) throw new NotFoundException('Faltan tanques');
+      for (const t of tqs) {
+        if (t.status !== 1) throw new ConflictException(`Tanque ${t.tnqPlacas} ocupado`);
       }
     }
-
-    const tanques = await this.getTanquesPorMancuerna(id);
-    const mancu = await this.mancuernaRepo.findOne({
-      where: { mncId: id },
-      relations: ['trPlc2', 'dolly', 'opCed2'],
-    });
-
-    return { ...mancu!, tanques, tanque1: tanques[0] ?? null, tanque2: tanques[1] ?? null };
   }
 
-  // ============================================================
-  //                          DELETE
-  // ============================================================
-  async remove(id: number) {
-    await this.mancTanqRepo.delete({ mncId: id });
+  // Busca si existe una mancuerna con la misma combinación física
+  private async buscarMancuernaExistente(trPlc: string, dollyId: string, tanquesIds: number[]): Promise<Mancuerna | null> {
+    const candidatos = await this.mancuernaRepo.find({
+      where: { trPlc, dollyId },
+      relations: ['mancTanqs'],
+    });
 
-    const mancu = await this.mancuernaRepo.findOne({ where: { mncId: id } });
-    if (!mancu) throw new NotFoundException(`Mancuerna ${id} no encontrada`);
+    const inputSet = new Set(tanquesIds.map(String));
 
-    await this.mancuernaRepo.remove(mancu);
+    for (const cand of candidatos) {
+      const currentIds = cand.mancTanqs.map(mt => String(mt.tnqId));
+      if (currentIds.length !== inputSet.size) continue;
+      const match = currentIds.every(id => inputSet.has(id));
+      if (match) return cand;
+    }
+    return null;
+  }
 
-    return { message: `Mancuerna ${id} eliminada correctamente` };
+  // ==========================
+  //         CREATE
+  // ==========================
+  async create(dto: CreateMancuernaDto): Promise<MancuernaItemDto> {
+    const tanquesIds = [...new Set(dto.tanquesIds || [])];
+
+    // 1. Verificar existencia de combinación
+    const existente = await this.buscarMancuernaExistente(dto.trPlc, dto.dollyId, tanquesIds);
+    let mancuernaFinalId: number;
+
+    if (existente) {
+      // --- REACTIVAR ---
+      if (existente.status === 1 || existente.status === 2) {
+        throw new ConflictException('Mancuerna ya existe y está activa.');
+      }
+      
+      // Validamos disponibilidad de todo antes de reactivar
+      await this.validarDisponibilidad(dto.trPlc, dto.dollyId, tanquesIds, dto.opCed);
+
+      existente.status = 1; 
+      // NO asignamos opCed aquí a la mancuerna, porque ya no tiene esa columna
+      await this.mancuernaRepo.save(existente);
+      mancuernaFinalId = existente.mncId;
+
+    } else {
+      // --- NUEVA ---
+      await this.validarDisponibilidad(dto.trPlc, dto.dollyId, tanquesIds, dto.opCed);
+
+      const entity = this.mancuernaRepo.create({
+        trPlc: dto.trPlc,
+        dollyId: dto.dollyId,
+        // opCed: dto.opCed,  <-- ELIMINADO: No existe en Mancuerna
+        mncNom: dto.mncNom ?? `MNC-${dto.trPlc}`,
+        npmcDesc: dto.npmcDesc,
+        status: 1,
+      });
+      const saved = await this.mancuernaRepo.save(entity);
+      
+      // Guardar Tanques
+      if (tanquesIds.length > 0) {
+         const links = tanquesIds.map(tnqId => this.mancTanqRepo.create({ mncId: saved.mncId, tnqId }));
+         await this.mancTanqRepo.save(links);
+      }
+      mancuernaFinalId = saved.mncId;
+    }
+
+    // --- LOGICA COMÚN: Registrar Operador y Ocupar ---
+
+    // 1. Crear el registro en MancOp (Tabla Histórica/Activa)
+    const nuevoLog = this.mancOpRepo.create({
+      mncId: mancuernaFinalId,
+      opCed: dto.opCed,
+      status: true
+    });
+    await this.mancOpRepo.save(nuevoLog);
+
+    // 2. Cambiar estados a OCUPADO (incluyendo al operador)
+    await this.ocuparComponentes(dto.trPlc, dto.dollyId, tanquesIds, dto.opCed);
+
+    return this.findOne(mancuernaFinalId);
+  }
+
+  // ==========================
+  //    DESARMAR (STATUS 3)
+  // ==========================
+  async desarmar(mncId: number): Promise<{ message: string }> {
+    // Necesitamos cargar mancOps para saber quién era el operador activo
+    const mancuerna = await this.mancuernaRepo.findOne({
+      where: { mncId },
+      relations: ['mancTanqs', 'mancOps'] 
+    });
+
+    if (!mancuerna) throw new NotFoundException('Mancuerna no encontrada');
+    if (mancuerna.status === 3) throw new ConflictException('Ya está desarmada');
+
+    const tnqIds = mancuerna.mancTanqs.map(mt => mt.tnqId).filter(id => id !== null) as number[];
+
+    // 1. Buscar Operador Activo en MancOp (el que no tiene deletedAt)
+    const logActivo = mancuerna.mancOps?.find(mo => !mo.deletedAt);
+
+    // 2. Cambiar Status Mancuerna a 3
+    mancuerna.status = 3;
+    await this.mancuernaRepo.save(mancuerna);
+
+    // 3. Liberar Componentes Físicos
+    if (mancuerna.trPlc && mancuerna.dollyId) {
+      await this.liberarComponentes(mancuerna.trPlc, mancuerna.dollyId, tnqIds);
+    }
+
+    // 4. Liberar Operador y Cerrar MancOp
+    if (logActivo) {
+      // Liberar al operador (Status -> true)
+      await this.opRepo.update(logActivo.opCed, { status: true });
+
+      // Soft delete al registro de MancOp para marcarlo como "terminado"
+      await this.mancOpRepo.softDelete(logActivo.mancOpId);
+    }
+
+    return { message: `Mancuerna ${mncId} desarmada correctamente.` };
+  }
+
+  // ==========================
+  //        FIND ONE
+  // ==========================
+  async findOne(mncId: number): Promise<MancuernaItemDto> {
+    const item = await this.mancuernaRepo.findOne({
+      where: { mncId },
+      relations: [
+        'tracto', 'dolly', 
+        'mancTanqs', 'mancTanqs.tnq',
+        // IMPORTANTE: traer mancOps y su relación operador
+      ], 
+    });
+
+    if (!item) throw new NotFoundException(`Mancuerna ${mncId} no encontrada`);
+
+    // Truco: Para el historial completo (incluyendo soft-deleted), hacemos query aparte
+    // porque findOne a veces filtra los deleted de las relaciones hijos.
+    const historialCompleto = await this.mancOpRepo.find({
+      where: { mncId },
+      withDeleted: true, // Traer históricos
+      relations: ['operador'],
+      order: { createdAt: 'DESC' }
+    });
+    
+    // Asignamos manual para que el mapper lo use
+    item.mancOps = historialCompleto;
+
+    return { items: { mancuerna: this.toResponseDto(item) } };
+  }
+
+  // ==========================
+  //        FIND ALL
+  // ==========================
+  async findAll(): Promise<MancuernaItemsDto> {
+    const list = await this.mancuernaRepo.find({
+      relations: [
+        'tracto', 'dolly', 
+        'mancTanqs', 'mancTanqs.tnq', 
+        'mancOps', 'mancOps.operador'
+      ],
+      order: { createdAt: 'DESC' },
+    });
+    
+    // Nota: findAll traerá en mancOps solo los activos (sin deletedAt) por defecto.
+    // Si quieres historial completo en el listado masivo, sería muy pesado,
+    // así que dejamos el comportamiento por defecto (solo mostrará el operador actual).
+    
+    return { items: { mancuernas: list.map(m => this.toResponseDto(m)) } };
   }
 }

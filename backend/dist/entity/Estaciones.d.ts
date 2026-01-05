@@ -7,12 +7,11 @@ export declare class Estaciones {
     etnsNombreCorto: string;
     etnsDireccion: string;
     etnsUbicacion: string;
-    etnsTipo: string;
     etnsCiudad: string | null;
-    status: boolean | null;
-    createdAt: string | null;
-    updatedAt: string | null;
-    deletedAt: string | null;
+    status: boolean;
+    createdAt: Date;
+    updatedAt: Date | null;
+    deletedAt: Date | null;
     estacionesFolios: EstacionesFolio[];
     etnsClis: EtnsCli[];
 }

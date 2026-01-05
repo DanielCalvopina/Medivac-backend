@@ -15,6 +15,7 @@ const Tanque_1 = require("../entity/Tanque");
 const Dolly_1 = require("../entity/Dolly");
 const Operador_1 = require("../entity/Operador");
 const MancTanq_1 = require("../entity/MancTanq");
+const MancOp_1 = require("../entity/MancOp");
 const mancuerna_service_1 = require("../service/mancuerna.service");
 const mancuerna_controller_1 = require("../controller/mancuerna.controller");
 let MancuernaModule = class MancuernaModule {
@@ -29,6 +30,7 @@ exports.MancuernaModule = MancuernaModule = __decorate([
                 Tanque_1.Tanque,
                 Dolly_1.Dolly,
                 Operador_1.Operador,
+                MancOp_1.MancOp,
                 MancTanq_1.MancTanq,
             ]),
         ],

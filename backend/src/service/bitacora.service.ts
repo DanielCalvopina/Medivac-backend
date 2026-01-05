@@ -1,107 +1,107 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Bitacora } from 'src/entity/Bitacora';
-import { Viaje } from 'src/entity/Viaje';
+import { Bitacora } from '../entity/Bitacora';
+import { Viaje } from '../entity/Viaje';
+import { 
+  CreateBitacoraDto, 
+  UpdateBitacoraDto, 
+  BitacoraResponseDto, 
+  BitacoraItemDto, 
+  BitacoraItemsDto
+} from '../dto/bitacora.dto';
 
 @Injectable()
 export class BitacoraService {
   constructor(
-    @InjectRepository(Bitacora)
-    private readonly bitacoraRepository: Repository<Bitacora>,
-
-    @InjectRepository(Viaje)
-    private readonly viajeRepository: Repository<Viaje>,
+    @InjectRepository(Bitacora) private readonly bitRepo: Repository<Bitacora>,
+    @InjectRepository(Viaje) private readonly viajeRepo: Repository<Viaje>,
   ) {}
 
-  private todayStr(): string {
-    return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  // === MAPPER DINÁMICO ===
+  private toResponseDto(entity: Bitacora): BitacoraResponseDto {
+    return {
+      bitId: entity.bitId,
+      viajeId: entity.viajeId, // Solo retornamos el ID plano
+      bitFecIni: entity.bitFecIni,
+      bitFecFin: entity.bitFecFin,
+      bitTmpTotal: entity.bitTmpTotal,
+      bitDesc: entity.bitDesc,
+      status: entity.status,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt,
+      
+      // ELIMINADO: viaje (objeto anidado)
+    };
   }
 
-  // ======================================================
-  //                       CREATE
-  // ======================================================
-  async create(data: any) {
-    if (!data.viajeId) {
-      throw new BadRequestException("viajeId es requerido");
-    }
+  // === CREATE ===
+  async create(dto: CreateBitacoraDto): Promise<BitacoraItemDto> {
+    // Validamos que exista, pero no lo cargamos para devolverlo
+    const viaje = await this.viajeRepo.findOne({ where: { viajeId: dto.viajeId } });
+    if (!viaje) throw new NotFoundException(`El viaje con ID ${dto.viajeId} no existe`);
 
-    const viaje = await this.viajeRepository.findOne({
-      where: { viajeId: data.viajeId },
+    const entity = this.bitRepo.create({
+      ...dto,
+      status: dto.status ?? 1,
     });
 
-    if (!viaje) {
-      throw new NotFoundException(`El viaje con ID ${data.viajeId} no existe`);
-    }
-
-    const today = this.todayStr();
-
-    const nuevaBitacora = this.bitacoraRepository.create({
-      ...data,
-      viajeId: data.viajeId,  // 👈 ahora SÍ se guardará
-      viaje: viaje,           // 👈 relación opcional
-      createdAt: today,
-      updatedAt: today,
-    });
-
-    return await this.bitacoraRepository.save(nuevaBitacora);
+    const saved = await this.bitRepo.save(entity);
+    return this.findOne(saved.bitId); 
   }
 
-
-  // ======================================================
-  //                     FIND ALL
-  // ======================================================
-  async findAll() {
-    return await this.bitacoraRepository.find({
-      relations: ['viaje'],
-      order: { bitId: 'ASC' },
+  // === FIND ALL ===
+  async findAll(): Promise<BitacoraItemsDto> {
+    const list = await this.bitRepo.find({
+      // relations: ['viaje'], // ELIMINADO para evitar ciclo y mejorar performance
+      order: { createdAt: 'DESC' },
     });
+
+    return { items: { bitacoras: list.map(b => this.toResponseDto(b)) } };
   }
 
-  // ======================================================
-  //                    FIND ONE
-  // ======================================================
-  async findOne(id: number) {
-    const bitacora = await this.bitacoraRepository.findOne({
+  // === FIND ONE ===
+  async findOne(id: number): Promise<BitacoraItemDto> {
+    const bitacora = await this.bitRepo.findOne({
       where: { bitId: id },
-      relations: ['viaje'],
+      // relations: ['viaje'], // ELIMINADO
     });
 
-    if (!bitacora) {
-      throw new NotFoundException(`Bitácora con ID ${id} no encontrada`);
-    }
+    if (!bitacora) throw new NotFoundException(`Bitácora ${id} no encontrada`);
 
-    return bitacora;
+    return { items: { bitacora: this.toResponseDto(bitacora) } };
   }
-  async findByViaje(viajeId: number) {
-    return await this.bitacoraRepository.find({
-      where: { viaje: { viajeId } },
-      relations: ['viaje'],
-      order: { bitId: 'ASC' },
+
+  // === FIND BY VIAJE ===
+  async findByViaje(viajeId: number): Promise<BitacoraItemsDto> {
+    const list = await this.bitRepo.find({
+      where: { viajeId },
+      // relations: ['viaje'], // ELIMINADO
+      order: { createdAt: 'DESC' },
     });
+
+    return { items: { bitacoras: list.map(b => this.toResponseDto(b)) } };
   }
 
-  // ======================================================
-  //                      UPDATE
-  // ======================================================
-  async update(id: number, data: any) {
-    const bitacora = await this.findOne(id);
-    const today = this.todayStr();
+  // === UPDATE ===
+  async update(id: number, dto: UpdateBitacoraDto): Promise<BitacoraItemDto> {
+    const entity = await this.bitRepo.preload({
+      bitId: id,
+      ...dto,
+    });
 
-    Object.assign(bitacora, data, { updatedAt: today });
+    if (!entity) throw new NotFoundException(`Bitácora ${id} no encontrada`);
 
-    return await this.bitacoraRepository.save(bitacora);
+    await this.bitRepo.save(entity);
+    return this.findOne(id);
   }
 
-  // ======================================================
-  //                      DELETE
-  // ======================================================
-  async remove(id: number) {
-    const bitacora = await this.findOne(id);
-
-    await this.bitacoraRepository.remove(bitacora);
-
-    return { message: `Bitácora con ID ${id} eliminada correctamente` };
+  // === DELETE ===
+  async remove(id: number): Promise<{ deleted: true }> {
+    const res = await this.bitRepo.softDelete(id);
+    if (!res.affected) throw new NotFoundException(`Bitácora ${id} no encontrada`);
+    return { deleted: true };
   }
 }

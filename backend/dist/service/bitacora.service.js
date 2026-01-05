@@ -19,68 +19,73 @@ const typeorm_2 = require("typeorm");
 const Bitacora_1 = require("../entity/Bitacora");
 const Viaje_1 = require("../entity/Viaje");
 let BitacoraService = class BitacoraService {
-    bitacoraRepository;
-    viajeRepository;
-    constructor(bitacoraRepository, viajeRepository) {
-        this.bitacoraRepository = bitacoraRepository;
-        this.viajeRepository = viajeRepository;
+    bitRepo;
+    viajeRepo;
+    constructor(bitRepo, viajeRepo) {
+        this.bitRepo = bitRepo;
+        this.viajeRepo = viajeRepo;
     }
-    todayStr() {
-        return new Date().toISOString().slice(0, 10);
+    toResponseDto(entity) {
+        return {
+            bitId: entity.bitId,
+            viajeId: entity.viajeId,
+            bitFecIni: entity.bitFecIni,
+            bitFecFin: entity.bitFecFin,
+            bitTmpTotal: entity.bitTmpTotal,
+            bitDesc: entity.bitDesc,
+            status: entity.status,
+            createdAt: entity.createdAt,
+            updatedAt: entity.updatedAt,
+            deletedAt: entity.deletedAt,
+        };
     }
-    async create(data) {
-        if (!data.viajeId) {
-            throw new common_1.BadRequestException("viajeId es requerido");
-        }
-        const viaje = await this.viajeRepository.findOne({
-            where: { viajeId: data.viajeId },
+    async create(dto) {
+        const viaje = await this.viajeRepo.findOne({ where: { viajeId: dto.viajeId } });
+        if (!viaje)
+            throw new common_1.NotFoundException(`El viaje con ID ${dto.viajeId} no existe`);
+        const entity = this.bitRepo.create({
+            ...dto,
+            status: dto.status ?? 1,
         });
-        if (!viaje) {
-            throw new common_1.NotFoundException(`El viaje con ID ${data.viajeId} no existe`);
-        }
-        const today = this.todayStr();
-        const nuevaBitacora = this.bitacoraRepository.create({
-            ...data,
-            viajeId: data.viajeId,
-            viaje: viaje,
-            createdAt: today,
-            updatedAt: today,
-        });
-        return await this.bitacoraRepository.save(nuevaBitacora);
+        const saved = await this.bitRepo.save(entity);
+        return this.findOne(saved.bitId);
     }
     async findAll() {
-        return await this.bitacoraRepository.find({
-            relations: ['viaje'],
-            order: { bitId: 'ASC' },
+        const list = await this.bitRepo.find({
+            order: { createdAt: 'DESC' },
         });
+        return { items: { bitacoras: list.map(b => this.toResponseDto(b)) } };
     }
     async findOne(id) {
-        const bitacora = await this.bitacoraRepository.findOne({
+        const bitacora = await this.bitRepo.findOne({
             where: { bitId: id },
-            relations: ['viaje'],
         });
-        if (!bitacora) {
-            throw new common_1.NotFoundException(`Bitácora con ID ${id} no encontrada`);
-        }
-        return bitacora;
+        if (!bitacora)
+            throw new common_1.NotFoundException(`Bitácora ${id} no encontrada`);
+        return { items: { bitacora: this.toResponseDto(bitacora) } };
     }
     async findByViaje(viajeId) {
-        return await this.bitacoraRepository.find({
-            where: { viaje: { viajeId } },
-            relations: ['viaje'],
-            order: { bitId: 'ASC' },
+        const list = await this.bitRepo.find({
+            where: { viajeId },
+            order: { createdAt: 'DESC' },
         });
+        return { items: { bitacoras: list.map(b => this.toResponseDto(b)) } };
     }
-    async update(id, data) {
-        const bitacora = await this.findOne(id);
-        const today = this.todayStr();
-        Object.assign(bitacora, data, { updatedAt: today });
-        return await this.bitacoraRepository.save(bitacora);
+    async update(id, dto) {
+        const entity = await this.bitRepo.preload({
+            bitId: id,
+            ...dto,
+        });
+        if (!entity)
+            throw new common_1.NotFoundException(`Bitácora ${id} no encontrada`);
+        await this.bitRepo.save(entity);
+        return this.findOne(id);
     }
     async remove(id) {
-        const bitacora = await this.findOne(id);
-        await this.bitacoraRepository.remove(bitacora);
-        return { message: `Bitácora con ID ${id} eliminada correctamente` };
+        const res = await this.bitRepo.softDelete(id);
+        if (!res.affected)
+            throw new common_1.NotFoundException(`Bitácora ${id} no encontrada`);
+        return { deleted: true };
     }
 };
 exports.BitacoraService = BitacoraService;

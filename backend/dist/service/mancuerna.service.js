@@ -22,175 +22,196 @@ const Tanque_1 = require("../entity/Tanque");
 const Dolly_1 = require("../entity/Dolly");
 const Operador_1 = require("../entity/Operador");
 const MancTanq_1 = require("../entity/MancTanq");
+const MancOp_1 = require("../entity/MancOp");
 let MancuernaService = class MancuernaService {
     mancuernaRepo;
     tractoRepo;
-    tanqueRepo;
     dollyRepo;
-    operadorRepo;
+    tanqueRepo;
+    opRepo;
     mancTanqRepo;
-    constructor(mancuernaRepo, tractoRepo, tanqueRepo, dollyRepo, operadorRepo, mancTanqRepo) {
+    mancOpRepo;
+    constructor(mancuernaRepo, tractoRepo, dollyRepo, tanqueRepo, opRepo, mancTanqRepo, mancOpRepo) {
         this.mancuernaRepo = mancuernaRepo;
         this.tractoRepo = tractoRepo;
-        this.tanqueRepo = tanqueRepo;
         this.dollyRepo = dollyRepo;
-        this.operadorRepo = operadorRepo;
+        this.tanqueRepo = tanqueRepo;
+        this.opRepo = opRepo;
         this.mancTanqRepo = mancTanqRepo;
+        this.mancOpRepo = mancOpRepo;
     }
-    todayStr() {
-        return new Date().toISOString().slice(0, 10);
-    }
-    async getTanquesPorMancuerna(mncId) {
-        const links = await this.mancTanqRepo.find({
-            where: { mncId },
-            order: { mncTanqId: 'ASC' },
-        });
-        if (!links.length)
-            return [];
-        const tnqIds = links
-            .map(l => l.tnqId)
-            .filter((id) => id !== null);
-        if (!tnqIds.length)
-            return [];
-        const tanques = await this.tanqueRepo.find({
-            where: { tnqId: (0, typeorm_2.In)(tnqIds) },
-        });
-        const map = new Map(tanques.map(t => [t.tnqId, t]));
-        return tnqIds
-            .map(id => map.get(id))
-            .filter((t) => Boolean(t));
-    }
-    async getTanquesPorMancuernas(mncIds) {
-        const out = new Map();
-        if (!mncIds.length)
-            return out;
-        const links = await this.mancTanqRepo.find({
-            where: { mncId: (0, typeorm_2.In)(mncIds) },
-            order: { mncTanqId: 'ASC' },
-        });
-        if (!links.length)
-            return out;
-        const allTnqIds = links
-            .map(l => l.tnqId)
-            .filter((id) => id !== null);
-        const tanques = await this.tanqueRepo.find({
-            where: { tnqId: (0, typeorm_2.In)(allTnqIds) },
-        });
-        const mapT = new Map(tanques.map(t => [t.tnqId, t]));
-        for (const l of links) {
-            if (l.tnqId === null)
-                continue;
-            const arr = out.get(l.mncId) ?? [];
-            const t = mapT.get(l.tnqId);
-            if (t)
-                arr.push(t);
-            out.set(l.mncId, arr);
-        }
-        return out;
-    }
-    async create(payload) {
-        const today = this.todayStr();
-        const trPlc = payload.trPlc ?? payload.tractoId;
-        const opCed = payload.opCed ?? payload.operadorId;
-        if (!trPlc)
-            throw new common_1.BadRequestException('trPlc es requerido');
-        if (payload.dollyId === undefined)
-            throw new common_1.BadRequestException('dollyId es requerido');
-        const tracto = await this.tractoRepo.findOne({ where: { trPlc } });
-        if (!tracto)
-            throw new common_1.NotFoundException(`Tracto ${trPlc} no existe`);
-        const dol = await this.dollyRepo.findOne({ where: { dollyId: payload.dollyId } });
-        if (!dol)
-            throw new common_1.NotFoundException(`Dolly ${payload.dollyId} no existe`);
-        if (opCed) {
-            const op = await this.operadorRepo.findOne({ where: { opCed } });
-            if (!op)
-                throw new common_1.NotFoundException(`Operador ${opCed} no existe`);
-        }
-        const incoming = payload.tanquesIds ??
-            [payload.tanque1Id, payload.tanque2Id].filter(Boolean);
-        const tanquesIds = Array.from(new Set((incoming ?? []).map(v => Number(v)).filter(v => !isNaN(v))));
-        const dto = {
-            trPlc,
-            opCed: opCed ?? null,
-            dollyId: payload.dollyId,
-            mncNom: payload.mncNom ?? payload.mncCodigo ?? `MNC-${trPlc}`,
-            npmcDesc: payload.npmcDesc ?? payload.mncDesc ?? '',
-            status: payload.status ?? 1,
-            createdAt: today,
-            updatedAt: today,
+    toResponseDto(m) {
+        const tanquesDtos = (m.mancTanqs || [])
+            .map((mt) => mt.tnq)
+            .filter((t) => !!t)
+            .map((t) => ({ ...t }));
+        const historialRaw = m.mancOps || [];
+        const historial = historialRaw.map(mo => ({
+            mancOpId: mo.mancOpId,
+            fechaAsignacion: mo.createdAt,
+            fechaTermino: mo.deletedAt,
+            operador: { ...mo.operador }
+        }));
+        const activeLog = historialRaw.find(mo => !mo.deletedAt);
+        const operadorActual = activeLog && activeLog.operador
+            ? { ...activeLog.operador }
+            : null;
+        return {
+            mncId: m.mncId,
+            mncNom: m.mncNom,
+            npmcDesc: m.npmcDesc,
+            status: m.status,
+            createdAt: m.createdAt,
+            updatedAt: m.updatedAt,
+            tracto: m.tracto ? { ...m.tracto } : null,
+            dolly: m.dolly ? { ...m.dolly } : null,
+            operadorActual: operadorActual,
+            tanques: tanquesDtos,
+            historialOperadores: historial
         };
-        const mancu = await this.mancuernaRepo.save(this.mancuernaRepo.create(dto));
+    }
+    async ocuparComponentes(trPlc, dollyId, tanquesIds, opCed) {
+        await this.tractoRepo.update(trPlc, { status: 2 });
+        await this.dollyRepo.update(dollyId, { status: 2 });
         if (tanquesIds.length) {
-            const rows = tanquesIds.map(tnqId => this.mancTanqRepo.create({ mncId: mancu.mncId, tnqId }));
-            await this.mancTanqRepo.save(rows);
+            await this.tanqueRepo.update({ tnqId: (0, typeorm_2.In)(tanquesIds) }, { status: 2 });
         }
-        const tanques = await this.getTanquesPorMancuerna(mancu.mncId);
-        return { ...mancu, tanques, tanque1: tanques[0] ?? null, tanque2: tanques[1] ?? null };
+        await this.opRepo.update(opCed, { status: false });
     }
-    async findAll() {
-        const base = await this.mancuernaRepo.find({
-            relations: ['trPlc2', 'dolly', 'opCed2'],
-            order: { mncId: 'ASC' },
-        });
-        const byId = await this.getTanquesPorMancuernas(base.map(b => b.mncId));
-        return base.map(m => {
-            const tanques = byId.get(m.mncId) ?? [];
-            return { ...m, tanques, tanque1: tanques[0] ?? null, tanque2: tanques[1] ?? null };
-        });
+    async liberarComponentes(trPlc, dollyId, tanquesIds) {
+        await this.tractoRepo.update(trPlc, { status: 1 });
+        await this.dollyRepo.update(dollyId, { status: 1 });
+        if (tanquesIds.length) {
+            await this.tanqueRepo.update({ tnqId: (0, typeorm_2.In)(tanquesIds) }, { status: 1 });
+        }
     }
-    async findOne(id) {
-        const mancu = await this.mancuernaRepo.findOne({
-            where: { mncId: id },
-            relations: ['trPlc2', 'dolly', 'opCed2'],
-        });
-        if (!mancu)
-            throw new common_1.NotFoundException(`Mancuerna ${id} no encontrada`);
-        const tanques = await this.getTanquesPorMancuerna(id);
-        return { ...mancu, tanques, tanque1: tanques[0] ?? null, tanque2: tanques[1] ?? null };
-    }
-    async update(id, payload) {
-        const today = this.todayStr();
-        await this.findOne(id);
-        const trPlc = payload.trPlc ?? payload.tractoId;
-        const opCed = payload.opCed ?? payload.operadorId;
-        const incoming = payload.tanquesIds ??
-            [payload.tanque1Id, payload.tanque2Id].filter(Boolean);
-        const tanquesIds = Array.from(new Set((incoming ?? []).map(v => Number(v)).filter(v => !isNaN(v))));
-        const tanksProvided = 'tanquesIds' in payload ||
-            'tanque1Id' in payload ||
-            'tanque2Id' in payload;
-        const patch = {
-            ...(trPlc ? { trPlc } : {}),
-            ...(opCed !== undefined ? { opCed } : {}),
-            ...(payload.dollyId !== undefined ? { dollyId: payload.dollyId } : {}),
-            ...(payload.mncNom !== undefined ? { mncNom: payload.mncNom } : {}),
-            ...(payload.npmcDesc !== undefined ? { npmcDesc: payload.npmcDesc } : {}),
-            ...(payload.status !== undefined ? { status: payload.status } : {}),
-            updatedAt: today,
-        };
-        await this.mancuernaRepo.update(id, patch);
-        if (tanksProvided) {
-            await this.mancTanqRepo.delete({ mncId: id });
-            if (tanquesIds.length) {
-                const rows = tanquesIds.map(tnqId => this.mancTanqRepo.create({ mncId: id, tnqId }));
-                await this.mancTanqRepo.save(rows);
+    async validarDisponibilidad(trPlc, dollyId, tanquesIds, opCed) {
+        const tr = await this.tractoRepo.findOneBy({ trPlc });
+        if (!tr || tr.status !== 1)
+            throw new common_1.ConflictException(`Tracto ${trPlc} no disponible`);
+        const dl = await this.dollyRepo.findOneBy({ dollyId });
+        if (!dl || dl.status !== 1)
+            throw new common_1.ConflictException(`Dolly ${dollyId} no disponible`);
+        const op = await this.opRepo.findOneBy({ opCed });
+        if (!op)
+            throw new common_1.NotFoundException(`Operador ${opCed} no existe`);
+        if (op.status === false)
+            throw new common_1.ConflictException(`Operador ${opCed} ya está ocupado`);
+        if (tanquesIds.length > 0) {
+            const tqs = await this.tanqueRepo.find({ where: { tnqId: (0, typeorm_2.In)(tanquesIds) } });
+            if (tqs.length !== tanquesIds.length)
+                throw new common_1.NotFoundException('Faltan tanques');
+            for (const t of tqs) {
+                if (t.status !== 1)
+                    throw new common_1.ConflictException(`Tanque ${t.tnqPlacas} ocupado`);
             }
         }
-        const tanques = await this.getTanquesPorMancuerna(id);
-        const mancu = await this.mancuernaRepo.findOne({
-            where: { mncId: id },
-            relations: ['trPlc2', 'dolly', 'opCed2'],
-        });
-        return { ...mancu, tanques, tanque1: tanques[0] ?? null, tanque2: tanques[1] ?? null };
     }
-    async remove(id) {
-        await this.mancTanqRepo.delete({ mncId: id });
-        const mancu = await this.mancuernaRepo.findOne({ where: { mncId: id } });
-        if (!mancu)
-            throw new common_1.NotFoundException(`Mancuerna ${id} no encontrada`);
-        await this.mancuernaRepo.remove(mancu);
-        return { message: `Mancuerna ${id} eliminada correctamente` };
+    async buscarMancuernaExistente(trPlc, dollyId, tanquesIds) {
+        const candidatos = await this.mancuernaRepo.find({
+            where: { trPlc, dollyId },
+            relations: ['mancTanqs'],
+        });
+        const inputSet = new Set(tanquesIds.map(String));
+        for (const cand of candidatos) {
+            const currentIds = cand.mancTanqs.map(mt => String(mt.tnqId));
+            if (currentIds.length !== inputSet.size)
+                continue;
+            const match = currentIds.every(id => inputSet.has(id));
+            if (match)
+                return cand;
+        }
+        return null;
+    }
+    async create(dto) {
+        const tanquesIds = [...new Set(dto.tanquesIds || [])];
+        const existente = await this.buscarMancuernaExistente(dto.trPlc, dto.dollyId, tanquesIds);
+        let mancuernaFinalId;
+        if (existente) {
+            if (existente.status === 1 || existente.status === 2) {
+                throw new common_1.ConflictException('Mancuerna ya existe y está activa.');
+            }
+            await this.validarDisponibilidad(dto.trPlc, dto.dollyId, tanquesIds, dto.opCed);
+            existente.status = 1;
+            await this.mancuernaRepo.save(existente);
+            mancuernaFinalId = existente.mncId;
+        }
+        else {
+            await this.validarDisponibilidad(dto.trPlc, dto.dollyId, tanquesIds, dto.opCed);
+            const entity = this.mancuernaRepo.create({
+                trPlc: dto.trPlc,
+                dollyId: dto.dollyId,
+                mncNom: dto.mncNom ?? `MNC-${dto.trPlc}`,
+                npmcDesc: dto.npmcDesc,
+                status: 1,
+            });
+            const saved = await this.mancuernaRepo.save(entity);
+            if (tanquesIds.length > 0) {
+                const links = tanquesIds.map(tnqId => this.mancTanqRepo.create({ mncId: saved.mncId, tnqId }));
+                await this.mancTanqRepo.save(links);
+            }
+            mancuernaFinalId = saved.mncId;
+        }
+        const nuevoLog = this.mancOpRepo.create({
+            mncId: mancuernaFinalId,
+            opCed: dto.opCed,
+            status: true
+        });
+        await this.mancOpRepo.save(nuevoLog);
+        await this.ocuparComponentes(dto.trPlc, dto.dollyId, tanquesIds, dto.opCed);
+        return this.findOne(mancuernaFinalId);
+    }
+    async desarmar(mncId) {
+        const mancuerna = await this.mancuernaRepo.findOne({
+            where: { mncId },
+            relations: ['mancTanqs', 'mancOps']
+        });
+        if (!mancuerna)
+            throw new common_1.NotFoundException('Mancuerna no encontrada');
+        if (mancuerna.status === 3)
+            throw new common_1.ConflictException('Ya está desarmada');
+        const tnqIds = mancuerna.mancTanqs.map(mt => mt.tnqId).filter(id => id !== null);
+        const logActivo = mancuerna.mancOps?.find(mo => !mo.deletedAt);
+        mancuerna.status = 3;
+        await this.mancuernaRepo.save(mancuerna);
+        if (mancuerna.trPlc && mancuerna.dollyId) {
+            await this.liberarComponentes(mancuerna.trPlc, mancuerna.dollyId, tnqIds);
+        }
+        if (logActivo) {
+            await this.opRepo.update(logActivo.opCed, { status: true });
+            await this.mancOpRepo.softDelete(logActivo.mancOpId);
+        }
+        return { message: `Mancuerna ${mncId} desarmada correctamente.` };
+    }
+    async findOne(mncId) {
+        const item = await this.mancuernaRepo.findOne({
+            where: { mncId },
+            relations: [
+                'tracto', 'dolly',
+                'mancTanqs', 'mancTanqs.tnq',
+            ],
+        });
+        if (!item)
+            throw new common_1.NotFoundException(`Mancuerna ${mncId} no encontrada`);
+        const historialCompleto = await this.mancOpRepo.find({
+            where: { mncId },
+            withDeleted: true,
+            relations: ['operador'],
+            order: { createdAt: 'DESC' }
+        });
+        item.mancOps = historialCompleto;
+        return { items: { mancuerna: this.toResponseDto(item) } };
+    }
+    async findAll() {
+        const list = await this.mancuernaRepo.find({
+            relations: [
+                'tracto', 'dolly',
+                'mancTanqs', 'mancTanqs.tnq',
+                'mancOps', 'mancOps.operador'
+            ],
+            order: { createdAt: 'DESC' },
+        });
+        return { items: { mancuernas: list.map(m => this.toResponseDto(m)) } };
     }
 };
 exports.MancuernaService = MancuernaService;
@@ -198,11 +219,13 @@ exports.MancuernaService = MancuernaService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(Mancuerna_1.Mancuerna)),
     __param(1, (0, typeorm_1.InjectRepository)(Tracto_1.Tracto)),
-    __param(2, (0, typeorm_1.InjectRepository)(Tanque_1.Tanque)),
-    __param(3, (0, typeorm_1.InjectRepository)(Dolly_1.Dolly)),
+    __param(2, (0, typeorm_1.InjectRepository)(Dolly_1.Dolly)),
+    __param(3, (0, typeorm_1.InjectRepository)(Tanque_1.Tanque)),
     __param(4, (0, typeorm_1.InjectRepository)(Operador_1.Operador)),
     __param(5, (0, typeorm_1.InjectRepository)(MancTanq_1.MancTanq)),
+    __param(6, (0, typeorm_1.InjectRepository)(MancOp_1.MancOp)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,

@@ -14,14 +14,15 @@ const unidades_module_1 = require("./modules/unidades.module");
 const cliente_module_1 = require("./modules/cliente.module");
 const operador_module_1 = require("./modules/operador.module");
 const ubicacion_module_1 = require("./modules/ubicacion.module");
-const admin_module_1 = require("./modules/admin.module");
 const rutas_module_1 = require("./modules/rutas.module");
 const mancuerna_module_1 = require("./modules/mancuerna.module");
 const viajes_module_1 = require("./modules/viajes.module");
-const Bitacora_1 = require("./entity/Bitacora");
+const bitacora_module_1 = require("./modules/bitacora.module");
 const folio_module_1 = require("./modules/folio.module");
 const producto_module_1 = require("./modules/producto.module");
 const files_module_1 = require("./modules/files.module");
+const carga_module_1 = require("./modules/carga.module");
+const descarga_module_1 = require("./modules/descarga.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -33,14 +34,15 @@ exports.AppModule = AppModule = __decorate([
             cliente_module_1.ClienteModule,
             operador_module_1.OperadorModule,
             ubicacion_module_1.UbicacionModule,
-            admin_module_1.AdminModule,
             rutas_module_1.RutasModule,
             mancuerna_module_1.MancuernaModule,
             viajes_module_1.ViajesModule,
-            Bitacora_1.Bitacora,
+            bitacora_module_1.BitacoraModule,
             folio_module_1.FolioModule,
             producto_module_1.ProductoModule,
-            files_module_1.FilesModule
+            files_module_1.FilesModule,
+            carga_module_1.CargaModule,
+            descarga_module_1.DescargaModule
         ],
         providers: [],
         controllers: [],

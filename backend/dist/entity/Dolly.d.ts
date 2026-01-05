@@ -8,12 +8,12 @@ export declare class Dolly {
     dollyMod: string;
     dollyColor: string;
     dollyDesc: string;
-    dollyPolizaSeguro: string | null;
-    dollyExpPoliza: Date | null;
+    dollyPolizaSeguro: string;
+    dollyExpPoliza: string;
     status: number;
-    createdAt: string;
-    updatedAt: string | null;
-    deletedAt: string | null;
+    createdAt: Date;
+    updatedAt: Date | null;
+    deletedAt: Date | null;
     docDollies: DocDolly[];
     mancuernas: Mancuerna[];
 }

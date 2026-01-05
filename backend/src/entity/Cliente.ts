@@ -1,16 +1,16 @@
 import {
   Column,
   Entity,
-  Index,
   OneToMany,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
 } from "typeorm";
 import { EtnsCli } from "./EtnsCli";
 import { TmnCli } from "./TmnCli";
 import { Viaje } from "./Viaje";
 
-@Index("cliente_pk", ["cliId"], { unique: true })
-@Index("pk_cliente", ["cliId"], { unique: true })
 @Entity("cliente", { schema: "public" })
 export class Cliente {
   @PrimaryGeneratedColumn({ type: "integer", name: "cli_id" })
@@ -31,18 +31,19 @@ export class Cliente {
   @Column("character varying", { name: "cli_ruc", length: 30 })
   cliRuc: string;
 
-  @Column("boolean", { name: "status" })
+  @Column("boolean", { name: "status", default: true })
   status: boolean;
 
-  @Column("date", { name: "created_at" })
-  createdAt: string;
+  @CreateDateColumn({ name: "created_at", type: 'date' ,  default: () => 'CURRENT_DATE'})
+  createdAt: Date;
 
-  @Column("date", { name: "updated_at", nullable: true })
-  updatedAt: string | null;
+  @UpdateDateColumn({ name: "updated_at", type: 'date', nullable: true ,default: () => 'CURRENT_DATE'})
+  updatedAt: Date | null;
 
-  @Column("date", { name: "deleted_at", nullable: true })
-  deletedAt: string | null;
+  @DeleteDateColumn({ name: "deleted_at", type: 'date', nullable: true })
+  deletedAt: Date | null;
 
+  // Relaciones listas
   @OneToMany(() => EtnsCli, (etnsCli) => etnsCli.cli)
   etnsClis: EtnsCli[];
 

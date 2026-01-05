@@ -1,22 +1,21 @@
+import { MancOp } from "./MancOp";
 import { MancTanq } from "./MancTanq";
 import { Dolly } from "./Dolly";
-import { Operador } from "./Operador";
 import { Tracto } from "./Tracto";
 import { Viaje } from "./Viaje";
 export declare class Mancuerna {
     mncId: number;
-    trPlc: string;
-    dollyId: string;
-    opCed: string | null;
-    mncNom: string;
-    npmcDesc: string;
+    trPlc: string | null;
+    dollyId: string | null;
+    mncNom: string | null;
+    npmcDesc: string | null;
     status: number;
-    createdAt: string | null;
-    updatedAt: string | null;
-    deletedAt: string | null;
+    createdAt: Date;
+    updatedAt: Date | null;
+    deletedAt: Date | null;
+    mancOps: MancOp[];
     mancTanqs: MancTanq[];
     dolly: Dolly;
-    opCed2: Operador;
-    trPlc2: Tracto;
+    tracto: Tracto;
     viajes: Viaje[];
 }

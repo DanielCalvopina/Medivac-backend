@@ -1,281 +1,237 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
+import { 
+  BadRequestException, 
+  Injectable, 
+  NotFoundException 
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Folio } from 'src/entity/Folio';
-import { Producto } from 'src/entity/Producto';
-import { Viaje } from 'src/entity/Viaje';
-import { Tanque } from 'src/entity/Tanque';
-import { Mancuerna } from 'src/entity/Mancuerna';
-import { MancTanq } from 'src/entity/MancTanq';
-import { Estaciones } from 'src/entity/Estaciones';
-import { EstacionesFolio } from 'src/entity/EstacionesFolio';
+import { Folio } from '../entity/Folio';
+import { Producto } from '../entity/Producto';
+import { Viaje } from '../entity/Viaje';
+import { Tanque } from '../entity/Tanque';
+import { Mancuerna } from '../entity/Mancuerna';
+import { MancTanq } from '../entity/MancTanq';
+import { Estaciones } from '../entity/Estaciones';
+import { EstacionesFolio } from '../entity/EstacionesFolio';
+
+// DTOs
+import { 
+  CreateFolioDto, 
+  UpdateFolioDto, 
+  FolioItemDto, 
+  FolioItemsDto, 
+  FolioResponseDto 
+} from '../dto/folio.dto';
+import { ProductoResponseDto } from '../dto/producto.dto';
+import { EstacionesResponseDto } from '../dto/estaciones.dto';
+import { CargaResponseDto, SelloResponseDto } from '../dto/carga.dto';
+import { DescargaResponseDto } from '../dto/descarga.dto';
 
 @Injectable()
 export class FolioService {
   constructor(
-    @InjectRepository(Folio)
-    private readonly folioRepo: Repository<Folio>,
-
-    @InjectRepository(Producto)
-    private readonly productoRepo: Repository<Producto>,
-
-    @InjectRepository(Viaje)
-    private readonly viajeRepo: Repository<Viaje>,
-
-    @InjectRepository(Mancuerna)
-    private readonly mancuernaRepo: Repository<Mancuerna>,
-
-    @InjectRepository(Tanque)
-    private readonly tanqueRepo: Repository<Tanque>,
-
-    @InjectRepository(MancTanq)
-    private readonly mancTanqRepo: Repository<MancTanq>,
-
-    @InjectRepository(Estaciones)
-    private readonly estacionesRepo: Repository<Estaciones>,
-
-    @InjectRepository(EstacionesFolio)
-    private readonly estacionesFolioRepo: Repository<EstacionesFolio>,
+    @InjectRepository(Folio) private readonly folioRepo: Repository<Folio>,
+    @InjectRepository(Producto) private readonly productoRepo: Repository<Producto>,
+    @InjectRepository(Viaje) private readonly viajeRepo: Repository<Viaje>,
+    @InjectRepository(Mancuerna) private readonly mancuernaRepo: Repository<Mancuerna>,
+    @InjectRepository(Tanque) private readonly tanqueRepo: Repository<Tanque>,
+    @InjectRepository(MancTanq) private readonly mancTanqRepo: Repository<MancTanq>,
+    @InjectRepository(Estaciones) private readonly estacionesRepo: Repository<Estaciones>,
+    @InjectRepository(EstacionesFolio) private readonly estacionesFolioRepo: Repository<EstacionesFolio>,
   ) {}
 
-  private today(): string {
-    return new Date().toISOString().slice(0, 10);
+  // ==========================
+  //      HELPER: MAPPER
+  // ==========================
+  private toResponseDto(entity: Folio): FolioResponseDto {
+    
+    // A. Mapear Estaciones
+    const estacionesDtos = (entity.estacionesFolios || [])
+      .map(ef => ef.etns)
+      .filter(e => !!e)
+      .map(e => ({ ...e } as EstacionesResponseDto));
+
+    // B. Mapear Cargas
+    const cargasDtos = (entity.cargas || []).map(c => {
+      return {
+        cargaId: c.cargaId,
+        cargaFechEntrega: c.cargaFechEntrega,
+        cargaCargaReal: c.cargaCargaReal,
+        cargaBole: c.cargaBole,
+        cargaDensidad: c.cargaDensidad,
+        cargaTemperatura: c.cargaTemperatura,
+        folio: null, 
+        sellos: (c.sellos || []).map(s => ({ sellosId: s.sellosId, sellosNum: s.sellosNum } as SelloResponseDto))
+      } as CargaResponseDto;
+    });
+
+    // C. Mapear Descargas
+    const descargasDtos = (entity.descargas || []).map(d => {
+      return {
+        descargaId: d.descargaId,
+        descargaFechEntrega: d.descargaFechEntrega,
+        descargaBole: d.descargaBole,
+        descargaDensidad: d.descargaDensidad,
+        descargaTemperatura: d.descargaTemperatura,
+        folio: null 
+      } as DescargaResponseDto;
+    });
+
+    return {
+      folId: entity.folId,
+      folCod: entity.folCod,
+      folName: entity.folName,
+      folDesc: entity.folDesc,
+      tnqNumse: entity.tnqNumse,
+      status: entity.status,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt,
+      
+      producto: entity.prd ? ({ ...entity.prd } as ProductoResponseDto) : null,
+      
+      // ELIMINADO: viaje
+      
+      estaciones: estacionesDtos,
+      cargas: cargasDtos,
+      descargas: descargasDtos
+    };
   }
 
-  // =============================================================
-  //                        CREATE
-  // =============================================================
-  async create(data: any) {
-    const today = this.today();
+  // ==========================
+  //         CREATE
+  // ==========================
+  async create(dto: CreateFolioDto): Promise<FolioItemDto> {
+    const viaje = await this.viajeRepo.findOne({ where: { viajeId: dto.viajeId } });
+    if (!viaje) throw new NotFoundException(`Viaje ${dto.viajeId} no existe`);
 
-    // 1. Viaje
-    const viaje = await this.viajeRepo.findOne({
-      where: { viajeId: data.viajeId },
+    const tanque = await this.tanqueRepo.findOne({ where: { tnqNumSer: dto.tnqNumse } });
+    if (!tanque) throw new NotFoundException(`Tanque con serie ${dto.tnqNumse} no existe`);
+
+    const prod = await this.productoRepo.findOne({ where: { prdId: dto.prdId } });
+    if (!prod) throw new NotFoundException(`Producto ${dto.prdId} no existe`);
+
+    const entity = this.folioRepo.create({
+      viajeId: dto.viajeId,
+      prdId: dto.prdId,
+      folCod: dto.folCod,
+      folName: dto.folName,
+      folDesc: dto.folDesc,
+      tnqNumse: dto.tnqNumse,
+      status: dto.status ?? true,
     });
-    if (!viaje) {
-      throw new NotFoundException(`Viaje ${data.viajeId} no existe`);
-    }
+    
+    const saved = await this.folioRepo.save(entity);
 
-    // 2. Mancuerna
-    const mancuerna = await this.mancuernaRepo.findOne({
-      where: { mncId: viaje.mncId },
-    });
-    if (!mancuerna) {
-      throw new NotFoundException(`Mancuerna ${viaje.mncId} no existe`);
-    }
-
-    // 3. Tanque por número de serie (tnqNumSer)
-    if (!data.tnqNumse) {
-      throw new BadRequestException(`tnqNumse es obligatorio.`);
-    }
-
-    const tanque = await this.tanqueRepo.findOne({
-      where: { tnqNumSer: data.tnqNumse },
-    });
-
-    if (!tanque) {
-      throw new NotFoundException(`Tanque ${data.tnqNumse} no existe`);
-    }
-
-    // Validación suave de pertenencia a mancuerna (no bloquea)
-    try {
-      const tanquesManc = await this.mancTanqRepo.find({
-        where: { mncId: viaje.mncId },
-      });
-
-      const tanquesValidos = tanquesManc
-        .map((t) => t.tnqId)
-        .filter((id): id is number => id !== null);
-
-      if (
-        tanquesValidos.length > 0 &&
-        tanque.tnqId &&
-        !tanquesValidos.includes(tanque.tnqId)
-      ) {
-        // solo podrías loguear, pero NO se lanza error
-      }
-    } catch (e) {
-      // ignoramos errores de MancTanq
-    }
-
-    // 4. Producto
-    const producto = await this.productoRepo.findOne({
-      where: { prdId: data.prdId },
-    });
-    if (!producto) {
-      throw new NotFoundException(`Producto ${data.prdId} no existe`);
-    }
-
-    // 5. Crear folio (folOv numérico)
-    const folio = this.folioRepo.create({
-      ...data,
-      folOv:
-        data.folOv !== undefined && data.folOv !== null
-          ? Number(data.folOv)
-          : null,
-      createdAt: today,
-      updatedAt: today,
-    });
-
-    const saved = (await this.folioRepo.save(folio)) as unknown as Folio;
-
-    // 6. Registrar estaciones en tabla intersección
-    if (Array.isArray(data.estaciones)) {
-      for (const estId of data.estaciones) {
-        const est = await this.estacionesRepo.findOne({
-          where: { etnsId: estId },
-        });
-
-        if (est) {
-          await this.estacionesFolioRepo.save(
-            this.estacionesFolioRepo.create({
-              folId: saved.folId,
-              etnsId: est.etnsId,
-            }),
-          );
-        }
-      }
+    if (dto.estacionesIds && dto.estacionesIds.length > 0) {
+      const links = dto.estacionesIds.map(etnsId => 
+        this.estacionesFolioRepo.create({ folId: saved.folId, etnsId })
+      );
+      await this.estacionesFolioRepo.save(links);
     }
 
     return this.findOne(saved.folId);
   }
 
-  // =============================================================
-  //                        FIND ALL
-  // =============================================================
-  async findAll() {
-    return this.folioRepo.find({
-      relations: ['prd', 'viaje'],
+  // ==========================
+  //        FIND ALL
+  // ==========================
+  async findAll(): Promise<FolioItemsDto> {
+    const list = await this.folioRepo.find({
+      relations: [
+        'prd',
+        // 'viaje', // Ya no necesitamos traer viaje
+        'estacionesFolios', 'estacionesFolios.etns',
+        'cargas', 'cargas.sellos',
+        'descargas'
+      ],
+      order: { createdAt: 'DESC' }
     });
+
+    return { items: { folios: list.map(f => this.toResponseDto(f)) } };
   }
 
-  async findByViaje(viajeId: number) {
-    return this.folioRepo.find({
+  // ==========================
+  //     FIND BY VIAJE
+  // ==========================
+  async findByViaje(viajeId: number): Promise<FolioItemsDto> {
+    const list = await this.folioRepo.find({
       where: { viajeId },
       relations: [
-        'viaje',
         'prd',
-        'estacionesFolios',
-        'estacionesFolios.etns',
+        'estacionesFolios', 'estacionesFolios.etns',
+        'cargas', 'cargas.sellos',
+        'descargas'
       ],
       order: { folId: 'ASC' },
     });
+    return { items: { folios: list.map(f => this.toResponseDto(f)) } };
   }
 
-  // =============================================================
-  //                        FIND ONE
-  // =============================================================
-  async findOne(id: number) {
+  // ==========================
+  //        FIND ONE
+  // ==========================
+  async findOne(id: number): Promise<FolioItemDto> {
     const folio = await this.folioRepo.findOne({
       where: { folId: id },
       relations: [
         'prd',
-        'viaje',
-        'estacionesFolios',
-        'estacionesFolios.etns',
+        'estacionesFolios', 'estacionesFolios.etns',
+        'cargas', 'cargas.sellos',
+        'descargas'
       ],
     });
 
-    if (!folio) {
-      throw new NotFoundException(`Folio ${id} no encontrado`);
-    }
+    if (!folio) throw new NotFoundException(`Folio ${id} no encontrado`);
 
-    return folio;
+    return { items: { folio: this.toResponseDto(folio) } };
   }
 
-  // =============================================================
-  //                        UPDATE
-  // =============================================================
-  async update(id: number, data: any) {
-    const today = this.today();
+  // ==========================
+  //         UPDATE
+  // ==========================
+  async update(id: number, dto: UpdateFolioDto): Promise<FolioItemDto> {
+    const folio = await this.folioRepo.findOne({ 
+      where: { folId: id },
+      relations: ['viaje'] // Aquí sí necesitamos viaje para validaciones internas (si cambias tanque)
+    });
+    
+    if (!folio) throw new NotFoundException(`Folio ${id} no encontrado`);
 
-    const folio = await this.findOne(id);
-
-    // Validar tanque si viene tnqNumse
-    if (data.tnqNumse) {
-      const viaje = folio.viaje;
-      if (!viaje) {
-        throw new NotFoundException(`Viaje asignado al folio no existe`);
-      }
-
-      const tanque = await this.tanqueRepo.findOne({
-        where: { tnqNumSer: data.tnqNumse },
-      });
-
-      if (!tanque) {
-        throw new NotFoundException(`Tanque ${data.tnqNumse} no existe`);
-      }
-
-      try {
-        const tanquesManc = await this.mancTanqRepo.find({
-          where: { mncId: viaje.mncId },
-        });
-
-        const tanquesValidos = tanquesManc
-          .map((t) => t.tnqId)
-          .filter((id): id is number => id !== null);
-
-        if (
-          tanquesValidos.length > 0 &&
-          tanque.tnqId &&
-          !tanquesValidos.includes(tanque.tnqId)
-        ) {
-          // solo log, no excepción
-        }
-      } catch (e) {
-        // ignoramos error de MancTanq
-      }
+    if (dto.tnqNumse && dto.tnqNumse !== folio.tnqNumse) {
+      const tanque = await this.tanqueRepo.findOne({ where: { tnqNumSer: dto.tnqNumse } });
+      if (!tanque) throw new NotFoundException(`Tanque ${dto.tnqNumse} no existe`);
     }
 
-    // folOv numérico si viene
-    if (data.folOv !== undefined) {
-      data.folOv =
-        data.folOv !== null && data.folOv !== ''
-          ? Number(data.folOv)
-          : null;
-    }
+    const updatedEntity = await this.folioRepo.preload({
+      folId: id,
+      ...dto
+    });
+    
+    await this.folioRepo.save(updatedEntity!);
 
-    Object.assign(folio, data, { updatedAt: today });
-
-    const updated = (await this.folioRepo.save(folio)) as Folio;
-
-    // Actualizar estaciones
-    if (Array.isArray(data.estaciones)) {
+    if (dto.estacionesIds !== undefined) {
       await this.estacionesFolioRepo.delete({ folId: id });
-
-      for (const estId of data.estaciones) {
-        const est = await this.estacionesRepo.findOne({
-          where: { etnsId: estId },
-        });
-
-        if (est) {
-          await this.estacionesFolioRepo.save(
-            this.estacionesFolioRepo.create({
-              folId: id,
-              etnsId: est.etnsId,
-            }),
-          );
-        }
+      
+      if (dto.estacionesIds.length > 0) {
+        const links = dto.estacionesIds.map(etnsId => 
+          this.estacionesFolioRepo.create({ folId: id, etnsId })
+        );
+        await this.estacionesFolioRepo.save(links);
       }
     }
 
-    return updated;
+    return this.findOne(id);
   }
 
-  // =============================================================
-  //                        DELETE
-  // =============================================================
-  async remove(id: number) {
+  // ==========================
+  //         REMOVE
+  // ==========================
+  async remove(id: number): Promise<{ deleted: true }> {
     await this.estacionesFolioRepo.delete({ folId: id });
-
-    const folio = await this.findOne(id);
-    await this.folioRepo.remove(folio);
-
-    return { message: `Folio ${id} eliminado correctamente` };
+    const res = await this.folioRepo.softDelete(id);
+    if (!res.affected) throw new NotFoundException(`Folio ${id} no encontrado`);
+    return { deleted: true };
   }
 }

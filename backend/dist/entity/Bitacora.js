@@ -22,6 +22,7 @@ let Bitacora = class Bitacora {
     createdAt;
     updatedAt;
     deletedAt;
+    viajeId;
     viaje;
 };
 exports.Bitacora = Bitacora;
@@ -34,44 +35,43 @@ __decorate([
     __metadata("design:type", Date)
 ], Bitacora.prototype, "bitFecIni", void 0);
 __decorate([
-    (0, typeorm_1.Column)("timestamp", { name: "bit_fec_fin" }),
-    __metadata("design:type", Date)
+    (0, typeorm_1.Column)("timestamp", { name: "bit_fec_fin", nullable: true }),
+    __metadata("design:type", Object)
 ], Bitacora.prototype, "bitFecFin", void 0);
 __decorate([
-    (0, typeorm_1.Column)("integer", { name: "bit_tmp_total" }),
-    __metadata("design:type", Number)
+    (0, typeorm_1.Column)("integer", { name: "bit_tmp_total", nullable: true }),
+    __metadata("design:type", Object)
 ], Bitacora.prototype, "bitTmpTotal", void 0);
 __decorate([
     (0, typeorm_1.Column)("character varying", { name: "bit_desc", length: 255 }),
     __metadata("design:type", String)
 ], Bitacora.prototype, "bitDesc", void 0);
 __decorate([
-    (0, typeorm_1.Column)("integer", { name: "status" }),
+    (0, typeorm_1.Column)("integer", { name: "status", default: 1 }),
     __metadata("design:type", Number)
 ], Bitacora.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)("timestamp", { name: "created_at" }),
+    (0, typeorm_1.CreateDateColumn)({ name: "created_at" }),
     __metadata("design:type", Date)
 ], Bitacora.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("timestamp", { name: "updated_at", nullable: true }),
+    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", nullable: true }),
     __metadata("design:type", Object)
 ], Bitacora.prototype, "updatedAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("timestamp", { name: "deleted_at", nullable: true }),
+    (0, typeorm_1.DeleteDateColumn)({ name: "deleted_at", nullable: true }),
     __metadata("design:type", Object)
 ], Bitacora.prototype, "deletedAt", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Viaje_1.Viaje, (viaje) => viaje.bitacoras, {
-        onDelete: "RESTRICT",
-        onUpdate: "RESTRICT",
-    }),
+    (0, typeorm_1.Column)("integer", { name: "viaje_id" }),
+    __metadata("design:type", Number)
+], Bitacora.prototype, "viajeId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => Viaje_1.Viaje, (viaje) => viaje.bitacoras),
     (0, typeorm_1.JoinColumn)([{ name: "viaje_id", referencedColumnName: "viajeId" }]),
     __metadata("design:type", Viaje_1.Viaje)
 ], Bitacora.prototype, "viaje", void 0);
 exports.Bitacora = Bitacora = __decorate([
-    (0, typeorm_1.Index)("pk_bitacora", ["bitId"], { unique: true }),
-    (0, typeorm_1.Index)("bitacora_pk", ["bitId"], { unique: true }),
     (0, typeorm_1.Entity)("bitacora", { schema: "public" })
 ], Bitacora);
 //# sourceMappingURL=Bitacora.js.map

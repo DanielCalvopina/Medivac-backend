@@ -1,20 +1,26 @@
 import {
   Column,
   Entity,
-  Index,
-  OneToMany,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  OneToMany,
 } from "typeorm";
 import { DocTanque } from "./DocTanque";
 import { MancTanq } from "./MancTanq";
 
-@Index("tanque_pk", ["tnqId"], { unique: true })
-@Index("pk_tanque", ["tnqId"], { unique: true })
 @Entity("tanque", { schema: "public" })
 export class Tanque {
+  // ==========================
+  //      IDENTIFICADORES
+  // ==========================
   @PrimaryGeneratedColumn({ type: "integer", name: "tnq_id" })
   tnqId: number;
 
+  // ==========================
+  //      DATOS TÉCNICOS
+  // ==========================
   @Column("character varying", { name: "tnq_placas", length: 60 })
   tnqPlacas: string;
 
@@ -57,24 +63,30 @@ export class Tanque {
   @Column("character varying", { name: "tnq_desc", length: 255 })
   tnqDesc: string;
 
-  @Column("character varying", { name: "tnq_poliza_seguro", length: 60, nullable: true })
-  tnqPolizaSeguro: string | null;
+  @Column("character varying", { name: "tnq_poliza_seguro", length: 60 })
+  tnqPolizaSeguro: string;
 
-  @Column("timestamp", { name: "tnq_exp_poliza", nullable: true })
-  tnqExpPoliza: Date | null;
+  @Column("date", { name: "tnq_exp_poliza" })
+  tnqExpPoliza: string;
 
-  @Column("integer", { name: "status" })
+  @Column("integer", { name: "status", default: 1 })
   status: number;
 
-  @Column("date", { name: "created_at" })
-  createdAt: string;
+  // ==========================
+  //        AUDITORÍA
+  // ==========================
+  @CreateDateColumn({ name: "created_at", type: "date" })
+  createdAt: Date;
 
-  @Column("date", { name: "updated_at", nullable: true })
-  updatedAt: string | null;
+  @UpdateDateColumn({ name: "updated_at", type: "date", nullable: true })
+  updatedAt: Date | null;
 
-  @Column("date", { name: "deleted_at", nullable: true })
-  deletedAt: string | null;
+  @DeleteDateColumn({ name: "deleted_at", type: "date", nullable: true })
+  deletedAt: Date | null;
 
+  // ==========================
+  //       RELACIONES
+  // ==========================
   @OneToMany(() => DocTanque, (docTanque) => docTanque.tnq)
   docTanques: DocTanque[];
 

@@ -30,7 +30,7 @@ let Tracto = class Tracto {
     trPeso;
     trDesc;
     trPolizaSeguro;
-    trExpPoliza;
+    trExpPolizaSeguro;
     status;
     createdAt;
     updatedAt;
@@ -40,7 +40,7 @@ let Tracto = class Tracto {
 };
 exports.Tracto = Tracto;
 __decorate([
-    (0, typeorm_1.Column)("character varying", { primary: true, name: "tr_plc", length: 60 }),
+    (0, typeorm_1.PrimaryColumn)("character varying", { name: "tr_plc", length: 60 }),
     __metadata("design:type", String)
 ], Tracto.prototype, "trPlc", void 0);
 __decorate([
@@ -100,40 +100,38 @@ __decorate([
     __metadata("design:type", String)
 ], Tracto.prototype, "trDesc", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "tr_poliza_seguro", length: 60, nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.Column)("character varying", { name: "tr_poliza_seguro", length: 60 }),
+    __metadata("design:type", String)
 ], Tracto.prototype, "trPolizaSeguro", void 0);
 __decorate([
-    (0, typeorm_1.Column)("timestamp", { name: "tr_exp_poliza", nullable: true }),
-    __metadata("design:type", Object)
-], Tracto.prototype, "trExpPoliza", void 0);
+    (0, typeorm_1.Column)("date", { name: "tr_exp_poliza_seguro" }),
+    __metadata("design:type", String)
+], Tracto.prototype, "trExpPolizaSeguro", void 0);
 __decorate([
-    (0, typeorm_1.Column)("integer", { name: "status" }),
+    (0, typeorm_1.Column)("integer", { name: "status", default: 1 }),
     __metadata("design:type", Number)
 ], Tracto.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "created_at" }),
-    __metadata("design:type", String)
+    (0, typeorm_1.CreateDateColumn)({ name: "created_at", type: "date" }),
+    __metadata("design:type", Date)
 ], Tracto.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "updated_at", nullable: true }),
+    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", type: "date", nullable: true }),
     __metadata("design:type", Object)
 ], Tracto.prototype, "updatedAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "deleted_at", nullable: true }),
+    (0, typeorm_1.DeleteDateColumn)({ name: "deleted_at", type: "date", nullable: true }),
     __metadata("design:type", Object)
 ], Tracto.prototype, "deletedAt", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => DocTracto_1.DocTracto, (docTracto) => docTracto.trPlc2),
+    (0, typeorm_1.OneToMany)(() => DocTracto_1.DocTracto, (docTracto) => docTracto.trPlc),
     __metadata("design:type", Array)
 ], Tracto.prototype, "docTractos", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => Mancuerna_1.Mancuerna, (mancuerna) => mancuerna.trPlc2),
+    (0, typeorm_1.OneToMany)(() => Mancuerna_1.Mancuerna, (mancuerna) => mancuerna.trPlc),
     __metadata("design:type", Array)
 ], Tracto.prototype, "mancuernas", void 0);
 exports.Tracto = Tracto = __decorate([
-    (0, typeorm_1.Index)("tracto_pk", ["trPlc"], { unique: true }),
-    (0, typeorm_1.Index)("pk_tracto", ["trPlc"], { unique: true }),
     (0, typeorm_1.Entity)("tracto", { schema: "public" })
 ], Tracto);
 //# sourceMappingURL=Tracto.js.map

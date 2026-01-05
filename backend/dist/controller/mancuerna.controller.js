@@ -15,37 +15,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MancuernaController = void 0;
 const common_1 = require("@nestjs/common");
 const mancuerna_service_1 = require("../service/mancuerna.service");
+const mancuerna_dto_1 = require("../dto/mancuerna.dto");
 let MancuernaController = class MancuernaController {
-    mancuernaService;
-    constructor(mancuernaService) {
-        this.mancuernaService = mancuernaService;
-    }
-    create(data) {
-        return this.mancuernaService.create(data);
+    svc;
+    constructor(svc) {
+        this.svc = svc;
     }
     findAll() {
-        return this.mancuernaService.findAll();
+        return this.svc.findAll();
     }
     findOne(id) {
-        return this.mancuernaService.findOne(id);
+        return this.svc.findOne(id);
     }
-    update(id, data) {
-        return this.mancuernaService.update(id, data);
+    create(body) {
+        return this.svc.create(body);
     }
-    remove(id) {
-        return this.mancuernaService.remove(id);
+    desarmar(id) {
+        return this.svc.desarmar(id);
+    }
+    update(id, body) {
+        return null;
     }
 };
 exports.MancuernaController = MancuernaController;
 __decorate([
-    (0, common_1.Post)('create'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], MancuernaController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)('list'),
+    (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
@@ -58,22 +52,29 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MancuernaController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Put)('update/:id'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
-    __param(1, (0, common_1.Body)()),
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:paramtypes", [mancuerna_dto_1.CreateMancuernaDto]),
     __metadata("design:returntype", void 0)
-], MancuernaController.prototype, "update", null);
+], MancuernaController.prototype, "create", null);
 __decorate([
-    (0, common_1.Delete)('delete/:id'),
+    (0, common_1.Patch)(':id/desarmar'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
-], MancuernaController.prototype, "remove", null);
+], MancuernaController.prototype, "desarmar", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, mancuerna_dto_1.UpdateMancuernaDto]),
+    __metadata("design:returntype", void 0)
+], MancuernaController.prototype, "update", null);
 exports.MancuernaController = MancuernaController = __decorate([
-    (0, common_1.Controller)('mancuerna'),
+    (0, common_1.Controller)('mancuernas'),
     __metadata("design:paramtypes", [mancuerna_service_1.MancuernaService])
 ], MancuernaController);
 //# sourceMappingURL=mancuerna.controller.js.map

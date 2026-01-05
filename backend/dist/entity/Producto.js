@@ -46,19 +46,19 @@ __decorate([
     __metadata("design:type", Number)
 ], Producto.prototype, "prdMin", void 0);
 __decorate([
-    (0, typeorm_1.Column)("boolean", { name: "status" }),
+    (0, typeorm_1.Column)("boolean", { name: "status", default: true }),
     __metadata("design:type", Boolean)
 ], Producto.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "created_at" }),
-    __metadata("design:type", String)
+    (0, typeorm_1.CreateDateColumn)({ name: "created_at", type: 'date' }),
+    __metadata("design:type", Date)
 ], Producto.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "updated_at", nullable: true }),
+    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", type: 'date', nullable: true }),
     __metadata("design:type", Object)
 ], Producto.prototype, "updatedAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "deleted_at", nullable: true }),
+    (0, typeorm_1.DeleteDateColumn)({ name: "deleted_at", type: 'date', nullable: true }),
     __metadata("design:type", Object)
 ], Producto.prototype, "deletedAt", void 0);
 __decorate([
@@ -66,8 +66,6 @@ __decorate([
     __metadata("design:type", Array)
 ], Producto.prototype, "folios", void 0);
 exports.Producto = Producto = __decorate([
-    (0, typeorm_1.Index)("pk_producto", ["prdId"], { unique: true }),
-    (0, typeorm_1.Index)("producto_pk", ["prdId"], { unique: true }),
     (0, typeorm_1.Entity)("producto", { schema: "public" })
 ], Producto);
 //# sourceMappingURL=Producto.js.map

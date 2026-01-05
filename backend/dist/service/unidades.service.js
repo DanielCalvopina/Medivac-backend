@@ -19,17 +19,6 @@ const typeorm_2 = require("typeorm");
 const Tracto_1 = require("../entity/Tracto");
 const Tanque_1 = require("../entity/Tanque");
 const Dolly_1 = require("../entity/Dolly");
-function withDefaults(data) {
-    const now = new Date().toISOString().split('T')[0];
-    const hasStatus = ['status', 'estado', 'estatus', 'trStatus', 'tnqStatus', 'dollyStatus']
-        .some(k => data[k] !== undefined && data[k] !== null);
-    return {
-        ...data,
-        status: hasStatus ? data.status : true,
-        createdAt: data.createdAt || now,
-        updatedAt: now,
-    };
-}
 let UnidadesService = class UnidadesService {
     tractoRepo;
     tanqueRepo;
@@ -39,77 +28,151 @@ let UnidadesService = class UnidadesService {
         this.tanqueRepo = tanqueRepo;
         this.dollyRepo = dollyRepo;
     }
-    listTractos() {
-        return this.tractoRepo.find();
+    tractoToResponse(x) {
+        return { ...x };
+    }
+    tanqueToResponse(x) {
+        return { ...x };
+    }
+    dollyToResponse(x) {
+        return { ...x };
+    }
+    async getUnidades() {
+        const [tractos, tanques, dollies] = await Promise.all([
+            this.tractoRepo.find({ order: { createdAt: 'DESC' } }),
+            this.tanqueRepo.find({ order: { createdAt: 'DESC' } }),
+            this.dollyRepo.find({ order: { createdAt: 'DESC' } }),
+        ]);
+        return {
+            items: {
+                tractos: tractos.map((x) => this.tractoToResponse(x)),
+                tanques: tanques.map((x) => this.tanqueToResponse(x)),
+                dollies: dollies.map((x) => this.dollyToResponse(x)),
+            },
+        };
+    }
+    async listTractos() {
+        const items = await this.tractoRepo.find({ order: { createdAt: 'DESC' } });
+        return items.map((x) => this.tractoToResponse(x));
     }
     async getTracto(trPlc) {
         const item = await this.tractoRepo.findOne({ where: { trPlc } });
         if (!item)
             throw new common_1.NotFoundException('Tracto no encontrado');
-        return item;
+        return this.tractoToResponse(item);
     }
-    createTracto(data) {
-        const payload = withDefaults(data);
-        const entity = this.tractoRepo.create(payload);
-        return this.tractoRepo.save(entity);
+    async createTracto(dto) {
+        const entity = this.tractoRepo.create({
+            ...dto,
+            status: dto.status ?? 1,
+        });
+        const saved = await this.tractoRepo.save(entity);
+        return this.tractoToResponse(saved);
     }
-    async updateTracto(trPlc, data) {
-        const now = new Date().toISOString().split('T')[0];
-        await this.tractoRepo.update({ trPlc }, { ...data, updatedAt: now });
-        return this.getTracto(trPlc);
+    async updateTracto(trPlc, dto) {
+        const loaded = await this.tractoRepo.preload({
+            trPlc,
+            ...dto,
+        });
+        if (!loaded)
+            throw new common_1.NotFoundException('Tracto no encontrado');
+        const saved = await this.tractoRepo.save(loaded);
+        return this.tractoToResponse(saved);
+    }
+    async changeTractoStatus(trPlc, newStatus) {
+        const item = await this.tractoRepo.findOne({ where: { trPlc } });
+        if (!item)
+            throw new common_1.NotFoundException('Tracto no encontrado');
+        item.status = newStatus;
+        const saved = await this.tractoRepo.save(item);
+        return this.tractoToResponse(saved);
     }
     async deleteTracto(trPlc) {
-        const res = await this.tractoRepo.delete({ trPlc });
+        const res = await this.tractoRepo.softDelete({ trPlc });
         if (!res.affected)
             throw new common_1.NotFoundException('Tracto no encontrado');
         return { deleted: true };
     }
-    listTanques() {
-        return this.tanqueRepo.find();
+    async listTanques() {
+        const items = await this.tanqueRepo.find({ order: { createdAt: 'DESC' } });
+        return items.map((x) => this.tanqueToResponse(x));
     }
     async getTanque(tnqId) {
         const item = await this.tanqueRepo.findOne({ where: { tnqId } });
         if (!item)
             throw new common_1.NotFoundException('Tanque no encontrado');
-        return item;
+        return this.tanqueToResponse(item);
     }
-    createTanque(data) {
-        const payload = withDefaults(data);
-        const entity = this.tanqueRepo.create(payload);
-        return this.tanqueRepo.save(entity);
+    async createTanque(dto) {
+        const entity = this.tanqueRepo.create({
+            ...dto,
+            status: dto.status ?? 1,
+        });
+        const saved = await this.tanqueRepo.save(entity);
+        return this.tanqueToResponse(saved);
     }
-    async updateTanque(tnqId, data) {
-        const now = new Date().toISOString().split('T')[0];
-        await this.tanqueRepo.update({ tnqId }, { ...data, updatedAt: now });
-        return this.getTanque(tnqId);
+    async updateTanque(tnqId, dto) {
+        const loaded = await this.tanqueRepo.preload({
+            tnqId,
+            ...dto,
+        });
+        if (!loaded)
+            throw new common_1.NotFoundException('Tanque no encontrado');
+        const saved = await this.tanqueRepo.save(loaded);
+        return this.tanqueToResponse(saved);
+    }
+    async changeTanqueStatus(tnqId, newStatus) {
+        const item = await this.tanqueRepo.findOne({ where: { tnqId } });
+        if (!item)
+            throw new common_1.NotFoundException('Tanque no encontrado');
+        item.status = newStatus;
+        const saved = await this.tanqueRepo.save(item);
+        return this.tanqueToResponse(saved);
     }
     async deleteTanque(tnqId) {
-        const res = await this.tanqueRepo.delete({ tnqId });
+        const res = await this.tanqueRepo.softDelete({ tnqId });
         if (!res.affected)
             throw new common_1.NotFoundException('Tanque no encontrado');
         return { deleted: true };
     }
-    listDollies() {
-        return this.dollyRepo.find();
+    async listDollies() {
+        const items = await this.dollyRepo.find({ order: { createdAt: 'DESC' } });
+        return items.map((x) => this.dollyToResponse(x));
     }
     async getDolly(dollyId) {
         const item = await this.dollyRepo.findOne({ where: { dollyId } });
         if (!item)
             throw new common_1.NotFoundException('Dolly no encontrado');
-        return item;
+        return this.dollyToResponse(item);
     }
-    createDolly(data) {
-        const payload = withDefaults(data);
-        const entity = this.dollyRepo.create(payload);
-        return this.dollyRepo.save(entity);
+    async createDolly(dto) {
+        const entity = this.dollyRepo.create({
+            ...dto,
+            status: dto.status ?? 1,
+        });
+        const saved = await this.dollyRepo.save(entity);
+        return this.dollyToResponse(saved);
     }
-    async updateDolly(dollyId, data) {
-        const now = new Date().toISOString().split('T')[0];
-        await this.dollyRepo.update({ dollyId }, { ...data, updatedAt: now });
-        return this.getDolly(dollyId);
+    async updateDolly(dollyId, dto) {
+        const loaded = await this.dollyRepo.preload({
+            dollyId,
+            ...dto,
+        });
+        if (!loaded)
+            throw new common_1.NotFoundException('Dolly no encontrado');
+        const saved = await this.dollyRepo.save(loaded);
+        return this.dollyToResponse(saved);
+    }
+    async changeDollyStatus(dollyId, newStatus) {
+        const item = await this.dollyRepo.findOne({ where: { dollyId } });
+        if (!item)
+            throw new common_1.NotFoundException('Dolly no encontrado');
+        item.status = newStatus;
+        const saved = await this.dollyRepo.save(item);
+        return this.dollyToResponse(saved);
     }
     async deleteDolly(dollyId) {
-        const res = await this.dollyRepo.delete({ dollyId });
+        const res = await this.dollyRepo.softDelete({ dollyId });
         if (!res.affected)
             throw new common_1.NotFoundException('Dolly no encontrado');
         return { deleted: true };

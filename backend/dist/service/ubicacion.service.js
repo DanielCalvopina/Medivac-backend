@@ -18,9 +18,9 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const Estaciones_1 = require("../entity/Estaciones");
 const Terminal_1 = require("../entity/Terminal");
+const Cliente_1 = require("../entity/Cliente");
 const EtnsCli_1 = require("../entity/EtnsCli");
 const TmnCli_1 = require("../entity/TmnCli");
-const Cliente_1 = require("../entity/Cliente");
 let UbicacionService = class UbicacionService {
     estRepo;
     trmRepo;
@@ -34,68 +34,113 @@ let UbicacionService = class UbicacionService {
         this.etnsCliRepo = etnsCliRepo;
         this.tmnCliRepo = tmnCliRepo;
     }
-    todayStr() {
-        return new Date().toISOString().slice(0, 10);
+    toEstacionResponse(entity) {
+        return { ...entity };
     }
-    listEstaciones() {
-        return this.estRepo.find();
+    toTerminalResponse(entity) {
+        return { ...entity };
+    }
+    toClienteResponse(entity) {
+        return { ...entity };
+    }
+    async getUbicaciones() {
+        const [estaciones, terminales] = await Promise.all([
+            this.estRepo.find({ order: { createdAt: 'DESC' } }),
+            this.trmRepo.find({ order: { createdAt: 'DESC' } }),
+        ]);
+        return {
+            items: {
+                estaciones: estaciones.map((e) => this.toEstacionResponse(e)),
+                terminales: terminales.map((t) => this.toTerminalResponse(t)),
+            },
+        };
+    }
+    async listEstaciones() {
+        const items = await this.estRepo.find({ order: { createdAt: 'DESC' } });
+        return items.map((x) => this.toEstacionResponse(x));
     }
     async getEstacion(etnsId) {
         const found = await this.estRepo.findOne({ where: { etnsId } });
         if (!found)
             throw new common_1.NotFoundException('Estación no encontrada');
-        return found;
+        return this.toEstacionResponse(found);
     }
-    async createEstacion(data) {
-        const today = this.todayStr();
-        const e = this.estRepo.create({
-            ...data,
-            createdAt: today,
-            updatedAt: today,
+    async createEstacion(dto) {
+        const entity = this.estRepo.create({
+            ...dto,
+            status: dto.status ?? true,
         });
-        return this.estRepo.save(e);
+        const saved = await this.estRepo.save(entity);
+        return this.toEstacionResponse(saved);
     }
-    async updateEstacion(etnsId, data) {
-        const estacion = await this.getEstacion(etnsId);
-        Object.assign(estacion, data, { updatedAt: this.todayStr() });
-        return this.estRepo.save(estacion);
+    async updateEstacion(etnsId, dto) {
+        const entity = await this.estRepo.preload({
+            etnsId,
+            ...dto,
+        });
+        if (!entity)
+            throw new common_1.NotFoundException('Estación no encontrada');
+        const saved = await this.estRepo.save(entity);
+        return this.toEstacionResponse(saved);
+    }
+    async toggleEstacionStatus(etnsId) {
+        const item = await this.estRepo.findOne({ where: { etnsId } });
+        if (!item)
+            throw new common_1.NotFoundException('Estación no encontrada');
+        item.status = !item.status;
+        const saved = await this.estRepo.save(item);
+        return this.toEstacionResponse(saved);
     }
     async deleteEstacion(etnsId) {
-        const res = await this.estRepo.delete({ etnsId });
+        const res = await this.estRepo.softDelete(etnsId);
         if (!res.affected)
             throw new common_1.NotFoundException('Estación no encontrada');
         return { deleted: true };
     }
-    listTerminales() {
-        return this.trmRepo.find();
+    async listTerminales() {
+        const items = await this.trmRepo.find({ order: { createdAt: 'DESC' } });
+        return items.map((x) => this.toTerminalResponse(x));
     }
     async getTerminal(trmId) {
         const found = await this.trmRepo.findOne({ where: { trmId } });
         if (!found)
             throw new common_1.NotFoundException('Terminal no encontrada');
-        return found;
+        return this.toTerminalResponse(found);
     }
-    async createTerminal(data) {
-        const today = this.todayStr();
-        const t = this.trmRepo.create({
-            ...data,
-            createdAt: today,
-            updatedAt: today,
+    async createTerminal(dto) {
+        const entity = this.trmRepo.create({
+            ...dto,
+            status: dto.status ?? true,
         });
-        return this.trmRepo.save(t);
+        const saved = await this.trmRepo.save(entity);
+        return this.toTerminalResponse(saved);
     }
-    async updateTerminal(trmId, data) {
-        const terminal = await this.getTerminal(trmId);
-        Object.assign(terminal, data, { updatedAt: this.todayStr() });
-        return this.trmRepo.save(terminal);
+    async updateTerminal(trmId, dto) {
+        const entity = await this.trmRepo.preload({
+            trmId,
+            ...dto,
+        });
+        if (!entity)
+            throw new common_1.NotFoundException('Terminal no encontrada');
+        const saved = await this.trmRepo.save(entity);
+        return this.toTerminalResponse(saved);
+    }
+    async toggleTerminalStatus(trmId) {
+        const item = await this.trmRepo.findOne({ where: { trmId } });
+        if (!item)
+            throw new common_1.NotFoundException('Terminal no encontrada');
+        item.status = !item.status;
+        const saved = await this.trmRepo.save(item);
+        return this.toTerminalResponse(saved);
     }
     async deleteTerminal(trmId) {
-        const res = await this.trmRepo.delete({ trmId });
+        const res = await this.trmRepo.softDelete(trmId);
         if (!res.affected)
             throw new common_1.NotFoundException('Terminal no encontrada');
         return { deleted: true };
     }
-    async vincularEstacionCliente(etnsId, cliId) {
+    async vincularEstacionCliente(dto) {
+        const { etnsId, cliId } = dto;
         const [est, cli] = await Promise.all([
             this.estRepo.findOne({ where: { etnsId } }),
             this.cliRepo.findOne({ where: { cliId } }),
@@ -110,7 +155,8 @@ let UbicacionService = class UbicacionService {
         const link = this.etnsCliRepo.create({ etnsId, cliId });
         return this.etnsCliRepo.save(link);
     }
-    async vincularTerminalCliente(trmId, cliId) {
+    async vincularTerminalCliente(dto) {
+        const { trmId, cliId } = dto;
         const [trm, cli] = await Promise.all([
             this.trmRepo.findOne({ where: { trmId } }),
             this.cliRepo.findOne({ where: { cliId } }),
@@ -125,45 +171,57 @@ let UbicacionService = class UbicacionService {
         const link = this.tmnCliRepo.create({ trmId, cliId });
         return this.tmnCliRepo.save(link);
     }
+    async estacionesConClientes() {
+        const estaciones = await this.estRepo.find({ order: { createdAt: 'DESC' } });
+        const links = await this.etnsCliRepo.find({ relations: ['cli', 'etns'] });
+        const map = new Map();
+        for (const l of links) {
+            if (!l.etns?.etnsId || !l.cli)
+                continue;
+            const key = l.etns.etnsId;
+            const arr = map.get(key) ?? [];
+            arr.push(this.toClienteResponse(l.cli));
+            map.set(key, arr);
+        }
+        return {
+            estaciones: estaciones.map((e) => ({
+                ...this.toEstacionResponse(e),
+                clientes: map.get(e.etnsId) ?? [],
+            })),
+        };
+    }
+    async terminalesConClientes() {
+        const terminales = await this.trmRepo.find({ order: { createdAt: 'DESC' } });
+        const links = await this.tmnCliRepo.find({ relations: ['cli', 'trm'] });
+        const map = new Map();
+        for (const l of links) {
+            if (!l.trm?.trmId || !l.cli)
+                continue;
+            const key = l.trm.trmId;
+            const arr = map.get(key) ?? [];
+            arr.push(this.toClienteResponse(l.cli));
+            map.set(key, arr);
+        }
+        return {
+            terminales: terminales.map((t) => ({
+                ...this.toTerminalResponse(t),
+                clientes: map.get(t.trmId) ?? [],
+            })),
+        };
+    }
     async estacionesPorCliente(cliId) {
-        const cli = await this.cliRepo.findOne({ where: { cliId } });
-        if (!cli)
-            throw new common_1.NotFoundException('Cliente no encontrado');
         const links = await this.etnsCliRepo.find({
             where: { cliId },
             relations: ['etns'],
         });
-        return links.map((l) => l.etns);
+        return links.map((l) => this.toEstacionResponse(l.etns));
     }
     async terminalesPorCliente(cliId) {
-        const cli = await this.cliRepo.findOne({ where: { cliId } });
-        if (!cli)
-            throw new common_1.NotFoundException('Cliente no encontrado');
         const links = await this.tmnCliRepo.find({
             where: { cliId },
             relations: ['trm'],
         });
-        return links.map((l) => l.trm);
-    }
-    async clientesPorEstacion(etnsId) {
-        const estacion = await this.estRepo.findOne({ where: { etnsId } });
-        if (!estacion)
-            throw new common_1.NotFoundException('Estación no encontrada');
-        const links = await this.etnsCliRepo.find({
-            where: { etnsId },
-            relations: ['cli'],
-        });
-        return links.map((l) => l.cli);
-    }
-    async clientesPorTerminal(trmId) {
-        const terminal = await this.trmRepo.findOne({ where: { trmId } });
-        if (!terminal)
-            throw new common_1.NotFoundException('Terminal no encontrada');
-        const links = await this.tmnCliRepo.find({
-            where: { trmId },
-            relations: ['cli'],
-        });
-        return links.map((l) => l.cli);
+        return links.map((l) => this.toTerminalResponse(l.trm));
     }
 };
 exports.UbicacionService = UbicacionService;

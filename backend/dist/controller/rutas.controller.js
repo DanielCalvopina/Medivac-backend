@@ -15,59 +15,71 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RutasController = void 0;
 const common_1 = require("@nestjs/common");
 const rutas_service_1 = require("../service/rutas.service");
+const rutas_dto_1 = require("../dto/rutas.dto");
 let RutasController = class RutasController {
     rutasService;
     constructor(rutasService) {
         this.rutasService = rutasService;
     }
-    async create(data) {
-        return await this.rutasService.create(data);
+    findAll() {
+        return this.rutasService.findAll();
     }
-    async findAll() {
-        return await this.rutasService.findAll();
+    findOne(id) {
+        return this.rutasService.findOne(id);
     }
-    async findOne(id) {
-        return await this.rutasService.findOne(id);
+    create(data) {
+        return this.rutasService.create(data);
     }
-    async update(id, data) {
-        return await this.rutasService.update(id, data);
+    update(id, data) {
+        return this.rutasService.update(id, data);
+    }
+    toggleStatus(id) {
+        return this.rutasService.toggleStatus(id);
     }
     async remove(id) {
-        return await this.rutasService.remove(id);
+        await this.rutasService.remove(id);
     }
 };
 exports.RutasController = RutasController;
 __decorate([
-    (0, common_1.Post)('create'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], RutasController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)('list'),
+    (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], RutasController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], RutasController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Put)('update/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [rutas_dto_1.CreateRutasDto]),
+    __metadata("design:returntype", Promise)
+], RutasController.prototype, "create", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:paramtypes", [Number, rutas_dto_1.UpdateRutasDto]),
     __metadata("design:returntype", Promise)
 ], RutasController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)('delete/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Patch)(':id/toggle-status'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], RutasController.prototype, "toggleStatus", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)

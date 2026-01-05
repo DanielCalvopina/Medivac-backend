@@ -51,8 +51,8 @@ __decorate([
 ], TmnCli.prototype, "trm", void 0);
 exports.TmnCli = TmnCli = __decorate([
     (0, typeorm_1.Index)("relationship_39_fk", ["cliId"], {}),
-    (0, typeorm_1.Index)("tmn_cli_pk", ["trmCliId"], { unique: true }),
     (0, typeorm_1.Index)("pk_tmn_cli", ["trmCliId"], { unique: true }),
+    (0, typeorm_1.Index)("tmn_cli_pk", ["trmCliId"], { unique: true }),
     (0, typeorm_1.Index)("relationship_38_fk", ["trmId"], {}),
     (0, typeorm_1.Entity)("tmn_cli", { schema: "public" })
 ], TmnCli);

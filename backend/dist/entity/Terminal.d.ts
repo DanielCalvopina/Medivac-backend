@@ -8,10 +8,10 @@ export declare class Terminal {
     trmUbicacion: string;
     trmTipo: string;
     trmCiudad: string;
-    status: boolean | null;
-    createdAt: string | null;
-    updatedAt: string | null;
-    deletedAt: string | null;
+    status: boolean;
+    createdAt: Date;
+    updatedAt: Date | null;
+    deletedAt: Date | null;
     terminalViajes: TerminalViaje[];
     tmnClis: TmnCli[];
 }

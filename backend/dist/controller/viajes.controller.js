@@ -15,37 +15,37 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ViajesController = void 0;
 const common_1 = require("@nestjs/common");
 const viajes_service_1 = require("../service/viajes.service");
+const viaje_dto_1 = require("../dto/viaje.dto");
 let ViajesController = class ViajesController {
-    viajesService;
-    constructor(viajesService) {
-        this.viajesService = viajesService;
+    svc;
+    constructor(svc) {
+        this.svc = svc;
     }
-    async create(data) {
-        return this.viajesService.create(data);
+    findAll() {
+        return this.svc.findAll();
     }
-    async findAll() {
-        return this.viajesService.findAll();
+    findOne(id) {
+        return this.svc.findOne(id);
     }
-    async findOne(id) {
-        return this.viajesService.findOne(id);
+    create(body) {
+        return this.svc.create(body);
     }
-    async update(id, data) {
-        return this.viajesService.update(id, data);
+    iniciar(id) {
+        return this.svc.iniciarViaje(id);
     }
-    async remove(id) {
-        return this.viajesService.remove(id);
+    finalizar(id) {
+        return this.svc.finalizarViaje(id);
+    }
+    update(id, body) {
+        return this.svc.update(id, body);
+    }
+    remove(id) {
+        return this.svc.remove(id);
     }
 };
 exports.ViajesController = ViajesController;
 __decorate([
-    (0, common_1.Post)('create'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], ViajesController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)('list'),
+    (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
@@ -58,19 +58,40 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ViajesController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Put)('update/:id'),
-    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
-    __param(1, (0, common_1.Body)()),
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:paramtypes", [viaje_dto_1.CreateViajeDto]),
     __metadata("design:returntype", Promise)
-], ViajesController.prototype, "update", null);
+], ViajesController.prototype, "create", null);
 __decorate([
-    (0, common_1.Delete)('delete/:id'),
+    (0, common_1.Patch)(':id/iniciar'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
+], ViajesController.prototype, "iniciar", null);
+__decorate([
+    (0, common_1.Patch)(':id/finalizar'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], ViajesController.prototype, "finalizar", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, viaje_dto_1.UpdateViajeDto]),
+    __metadata("design:returntype", Promise)
+], ViajesController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
 ], ViajesController.prototype, "remove", null);
 exports.ViajesController = ViajesController = __decorate([
     (0, common_1.Controller)('viajes'),

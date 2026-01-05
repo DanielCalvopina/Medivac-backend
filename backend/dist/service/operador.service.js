@@ -22,37 +22,57 @@ let OperadorService = class OperadorService {
     constructor(repo) {
         this.repo = repo;
     }
-    findAll() {
-        return this.repo.find();
+    toResponseDto(entity) {
+        return { ...entity };
+    }
+    async findAll() {
+        const list = await this.repo.find({ order: { createdAt: 'DESC' } });
+        return list.map((item) => this.toResponseDto(item));
     }
     async findOne(opCed) {
         const item = await this.repo.findOne({ where: { opCed } });
         if (!item)
-            throw new common_1.NotFoundException('Operador no encontrado');
-        return item;
+            throw new common_1.NotFoundException(`Operador ${opCed} no encontrado`);
+        return this.toResponseDto(item);
     }
-    async create(data) {
-        if (data.status === undefined || data.status === null)
-            data.status = true;
-        const now = new Date();
-        data.createdAt = now;
-        data.updatedAt = now;
-        if (!data.opVerificate || data.opVerificate.trim() === '') {
-            data.opVerificate = 'pendiente';
+    async create(dto) {
+        const exists = await this.repo.findOne({
+            where: { opCed: dto.opCed },
+            withDeleted: true
+        });
+        if (exists) {
+            throw new common_1.ConflictException('El operador con esa cédula ya existe.');
         }
-        const entity = this.repo.create(data);
-        return this.repo.save(entity);
+        const entity = this.repo.create({
+            ...dto,
+            status: dto.status ?? true,
+        });
+        const saved = await this.repo.save(entity);
+        return this.toResponseDto(saved);
     }
-    async update(opCed, data) {
-        await this.findOne(opCed);
-        data.updatedAt = new Date();
-        await this.repo.update({ opCed }, data);
-        return this.findOne(opCed);
+    async update(opCed, dto) {
+        const entity = await this.repo.preload({
+            opCed,
+            ...dto,
+        });
+        if (!entity)
+            throw new common_1.NotFoundException('Operador no encontrado');
+        const saved = await this.repo.save(entity);
+        return this.toResponseDto(saved);
+    }
+    async toggleStatus(opCed) {
+        const operator = await this.repo.findOne({ where: { opCed } });
+        if (!operator)
+            throw new common_1.NotFoundException('Operador no encontrado');
+        operator.status = !operator.status;
+        const saved = await this.repo.save(operator);
+        return this.toResponseDto(saved);
     }
     async remove(opCed) {
-        const res = await this.repo.delete({ opCed });
-        if (!res.affected)
+        const result = await this.repo.softDelete(opCed);
+        if (result.affected === 0) {
             throw new common_1.NotFoundException('Operador no encontrado');
+        }
         return { deleted: true };
     }
 };

@@ -70,8 +70,8 @@ __decorate([
     __metadata("design:type", Dolly_1.Dolly)
 ], DocDolly.prototype, "dolly", void 0);
 exports.DocDolly = DocDolly = __decorate([
-    (0, typeorm_1.Index)("pk_doc_dolly", ["docDollyId"], { unique: true }),
     (0, typeorm_1.Index)("doc_dolly_pk", ["docDollyId"], { unique: true }),
+    (0, typeorm_1.Index)("pk_doc_dolly", ["docDollyId"], { unique: true }),
     (0, typeorm_1.Index)("relationship_25_fk", ["dollyId"], {}),
     (0, typeorm_1.Entity)("doc_dolly", { schema: "public" })
 ], DocDolly);

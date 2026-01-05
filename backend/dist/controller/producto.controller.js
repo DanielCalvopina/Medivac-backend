@@ -15,62 +15,73 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductoController = void 0;
 const common_1 = require("@nestjs/common");
 const producto_service_1 = require("../service/producto.service");
+const producto_dto_1 = require("../dto/producto.dto");
 let ProductoController = class ProductoController {
     productoService;
     constructor(productoService) {
         this.productoService = productoService;
     }
-    create(body) {
-        return this.productoService.create(body);
-    }
     findAll() {
         return this.productoService.findAll();
     }
     findOne(id) {
-        return this.productoService.findOne(Number(id));
+        return this.productoService.findOne(id);
+    }
+    create(body) {
+        return this.productoService.create(body);
     }
     update(id, body) {
-        return this.productoService.update(Number(id), body);
+        return this.productoService.update(id, body);
+    }
+    toggleStatus(id) {
+        return this.productoService.toggleStatus(id);
     }
     remove(id) {
-        return this.productoService.remove(Number(id));
+        return this.productoService.remove(id);
     }
 };
 exports.ProductoController = ProductoController;
 __decorate([
-    (0, common_1.Post)('create'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], ProductoController.prototype, "create", null);
-__decorate([
-    (0, common_1.Get)('list'),
+    (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], ProductoController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
 ], ProductoController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Put)('update/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [producto_dto_1.CreateProductoDto]),
+    __metadata("design:returntype", Promise)
+], ProductoController.prototype, "create", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Number, producto_dto_1.UpdateProductoDto]),
+    __metadata("design:returntype", Promise)
 ], ProductoController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)('delete/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Patch)(':id/toggle-status'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], ProductoController.prototype, "toggleStatus", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
 ], ProductoController.prototype, "remove", null);
 exports.ProductoController = ProductoController = __decorate([
     (0, common_1.Controller)('producto'),

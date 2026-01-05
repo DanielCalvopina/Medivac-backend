@@ -9,8 +9,8 @@ import {
 import { Carga } from "./Carga";
 
 @Index("relationship_22_fk", ["cargaId"], {})
-@Index("doc_carga_pk", ["docCarId"], { unique: true })
 @Index("pk_doc_carga", ["docCarId"], { unique: true })
+@Index("doc_carga_pk", ["docCarId"], { unique: true })
 @Entity("doc_carga", { schema: "public" })
 export class DocCarga {
   @PrimaryGeneratedColumn({ type: "integer", name: "doc_car_id" })

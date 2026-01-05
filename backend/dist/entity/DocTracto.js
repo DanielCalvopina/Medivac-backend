@@ -70,8 +70,8 @@ __decorate([
     __metadata("design:type", Tracto_1.Tracto)
 ], DocTracto.prototype, "trPlc2", void 0);
 exports.DocTracto = DocTracto = __decorate([
-    (0, typeorm_1.Index)("pk_doc_tracto", ["docTractoId"], { unique: true }),
     (0, typeorm_1.Index)("doc_tracto_pk", ["docTractoId"], { unique: true }),
+    (0, typeorm_1.Index)("pk_doc_tracto", ["docTractoId"], { unique: true }),
     (0, typeorm_1.Index)("relationship_37_fk", ["trPlc"], {}),
     (0, typeorm_1.Entity)("doc_tracto", { schema: "public" })
 ], DocTracto);

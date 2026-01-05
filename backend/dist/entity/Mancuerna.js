@@ -11,26 +11,25 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Mancuerna = void 0;
 const typeorm_1 = require("typeorm");
+const MancOp_1 = require("./MancOp");
 const MancTanq_1 = require("./MancTanq");
 const Dolly_1 = require("./Dolly");
-const Operador_1 = require("./Operador");
 const Tracto_1 = require("./Tracto");
 const Viaje_1 = require("./Viaje");
 let Mancuerna = class Mancuerna {
     mncId;
     trPlc;
     dollyId;
-    opCed;
     mncNom;
     npmcDesc;
     status;
     createdAt;
     updatedAt;
     deletedAt;
+    mancOps;
     mancTanqs;
     dolly;
-    opCed2;
-    trPlc2;
+    tracto;
     viajes;
 };
 exports.Mancuerna = Mancuerna;
@@ -39,79 +38,60 @@ __decorate([
     __metadata("design:type", Number)
 ], Mancuerna.prototype, "mncId", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "tr_plc", length: 60 }),
-    __metadata("design:type", String)
+    (0, typeorm_1.Column)("character varying", { name: "tr_plc", length: 60, nullable: true }),
+    __metadata("design:type", Object)
 ], Mancuerna.prototype, "trPlc", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "dolly_id", length: 30 }),
-    __metadata("design:type", String)
+    (0, typeorm_1.Column)("character varying", { name: "dolly_id", length: 30, nullable: true }),
+    __metadata("design:type", Object)
 ], Mancuerna.prototype, "dollyId", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "op_ced", nullable: true, length: 30 }),
+    (0, typeorm_1.Column)("character varying", { name: "mnc_nom", length: 60, nullable: true }),
     __metadata("design:type", Object)
-], Mancuerna.prototype, "opCed", void 0);
-__decorate([
-    (0, typeorm_1.Column)("character varying", { name: "mnc_nom", length: 60 }),
-    __metadata("design:type", String)
 ], Mancuerna.prototype, "mncNom", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "npmc_desc", length: 60 }),
-    __metadata("design:type", String)
+    (0, typeorm_1.Column)("character varying", { name: "npmc_desc", length: 60, nullable: true }),
+    __metadata("design:type", Object)
 ], Mancuerna.prototype, "npmcDesc", void 0);
 __decorate([
-    (0, typeorm_1.Column)("integer", { name: "status" }),
+    (0, typeorm_1.Column)("integer", { name: "status", default: 1 }),
     __metadata("design:type", Number)
 ], Mancuerna.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "created_at", nullable: true }),
-    __metadata("design:type", Object)
+    (0, typeorm_1.CreateDateColumn)({ name: "created_at", type: 'date' }),
+    __metadata("design:type", Date)
 ], Mancuerna.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "updated_at", nullable: true }),
+    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", type: 'date', nullable: true }),
     __metadata("design:type", Object)
 ], Mancuerna.prototype, "updatedAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date", { name: "deleted_at", nullable: true }),
+    (0, typeorm_1.DeleteDateColumn)({ name: "deleted_at", type: 'date', nullable: true }),
     __metadata("design:type", Object)
 ], Mancuerna.prototype, "deletedAt", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => MancOp_1.MancOp, (mancOp) => mancOp.mnc),
+    __metadata("design:type", Array)
+], Mancuerna.prototype, "mancOps", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => MancTanq_1.MancTanq, (mancTanq) => mancTanq.mnc),
     __metadata("design:type", Array)
 ], Mancuerna.prototype, "mancTanqs", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Dolly_1.Dolly, (dolly) => dolly.mancuernas, {
-        onDelete: "RESTRICT",
-        onUpdate: "RESTRICT",
-    }),
+    (0, typeorm_1.ManyToOne)(() => Dolly_1.Dolly, (dolly) => dolly.mancuernas),
     (0, typeorm_1.JoinColumn)([{ name: "dolly_id", referencedColumnName: "dollyId" }]),
     __metadata("design:type", Dolly_1.Dolly)
 ], Mancuerna.prototype, "dolly", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Operador_1.Operador, (operador) => operador.mancuernas, {
-        onDelete: "RESTRICT",
-        onUpdate: "RESTRICT",
-    }),
-    (0, typeorm_1.JoinColumn)([{ name: "op_ced", referencedColumnName: "opCed" }]),
-    __metadata("design:type", Operador_1.Operador)
-], Mancuerna.prototype, "opCed2", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => Tracto_1.Tracto, (tracto) => tracto.mancuernas, {
-        onDelete: "RESTRICT",
-        onUpdate: "RESTRICT",
-    }),
+    (0, typeorm_1.ManyToOne)(() => Tracto_1.Tracto, (tracto) => tracto.mancuernas),
     (0, typeorm_1.JoinColumn)([{ name: "tr_plc", referencedColumnName: "trPlc" }]),
     __metadata("design:type", Tracto_1.Tracto)
-], Mancuerna.prototype, "trPlc2", void 0);
+], Mancuerna.prototype, "tracto", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => Viaje_1.Viaje, (viaje) => viaje.mnc),
     __metadata("design:type", Array)
 ], Mancuerna.prototype, "viajes", void 0);
 exports.Mancuerna = Mancuerna = __decorate([
-    (0, typeorm_1.Index)("relationship_3_fk", ["dollyId"], {}),
-    (0, typeorm_1.Index)("pk_mancuerna", ["mncId"], { unique: true }),
-    (0, typeorm_1.Index)("mancuerna_pk", ["mncId"], { unique: true }),
-    (0, typeorm_1.Index)("relationship_43_fk", ["opCed"], {}),
-    (0, typeorm_1.Index)("relationship_1_fk", ["trPlc"], {}),
     (0, typeorm_1.Entity)("mancuerna", { schema: "public" })
 ], Mancuerna);
 //# sourceMappingURL=Mancuerna.js.map

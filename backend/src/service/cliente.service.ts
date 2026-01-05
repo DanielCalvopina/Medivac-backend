@@ -1,55 +1,95 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cliente } from '../entity/Cliente';
+import { CreateClienteDto, UpdateClienteDto, ClienteResponseDto } from '../dto/cliente.dto';
 
 @Injectable()
 export class ClienteService {
-  constructor(@InjectRepository(Cliente) private readonly repo: Repository<Cliente>) {}
+  constructor(
+    @InjectRepository(Cliente)
+    private readonly repo: Repository<Cliente>,
+  ) {}
 
-  // Obtener todos los clientes
-  findAll() {
-    return this.repo.find();
+  // === MAPPER (Transforma Entity -> DTO Dinámicamente) ===
+  // Al usar spread operator (...), si agregas campos en la BD y DTO,
+  // se pasan automáticamente sin tener que editar esto.
+  private toResponseDto(entity: Cliente): ClienteResponseDto {
+    return { ...entity } as ClienteResponseDto;
   }
 
-  // Obtener un cliente por ID
-  async findOne(cliId: number) {
+  // GET ALL
+  async findAll(): Promise<ClienteResponseDto[]> {
+    // Ordenamos por fecha de creación (los más nuevos primero)
+    const list = await this.repo.find({ order: { createdAt: 'DESC' } });
+    return list.map((item) => this.toResponseDto(item));
+  }
+
+  // GET ONE
+  async findOne(cliId: number): Promise<ClienteResponseDto> {
     const cliente = await this.repo.findOne({ where: { cliId } });
-    if (!cliente) throw new NotFoundException('Cliente no encontrado');
-    return cliente;
+    if (!cliente) throw new NotFoundException(`Cliente con ID ${cliId} no encontrado`);
+    return this.toResponseDto(cliente);
   }
 
-  // Crear cliente con fechas automáticas
-  async create(data: Partial<Cliente>) {
-    if (data.status === undefined || data.status === null) {
-      data.status = true as any;
+  // CREATE
+  async create(dto: CreateClienteDto): Promise<ClienteResponseDto> {
+    // 1. Verificación de duplicados (RUC o Correo)
+    const existe = await this.repo.findOne({ 
+        where: [
+            { cliRuc: dto.cliRuc }, 
+            { cliCorreo: dto.cliCorreo }
+        ],
+        withDeleted: true 
+    });
+    
+    if (existe) {
+        throw new ConflictException('Ya existe un cliente con ese RUC o Correo.');
     }
 
-    const now = new Date().toISOString().split('T')[0]; // formato YYYY-MM-DD
-
-    const nuevo = this.repo.create({
-      ...data,
-      createdAt: now,
-      updatedAt: now,
+    // 2. Creación con Spread y Default Status
+    const entity = this.repo.create({
+        ...dto,
+        status: dto.status ?? true // Asume activo si no se envía
     });
 
-    return await this.repo.save(nuevo);
+    const saved = await this.repo.save(entity);
+    return this.toResponseDto(saved);
   }
 
-  // Actualizar cliente con fecha de actualización automática
-  async update(cliId: number, data: Partial<Cliente>) {
-    const cliente = await this.findOne(cliId);
-    if (!cliente) throw new NotFoundException('Cliente no encontrado');
+  // UPDATE
+  async update(cliId: number, dto: UpdateClienteDto): Promise<ClienteResponseDto> {
+    const cliente = await this.repo.preload({
+      cliId,
+      ...dto,
+    });
 
-    const now = new Date().toISOString().split('T')[0];
-    await this.repo.update(cliId, { ...data, updatedAt: now });
-    return this.findOne(cliId);
+    if (!cliente) throw new NotFoundException(`Cliente con ID ${cliId} no encontrado`);
+    
+    const saved = await this.repo.save(cliente);
+    return this.toResponseDto(saved);
   }
 
-  // Eliminar cliente
-  async remove(cliId: number) {
-    const res = await this.repo.delete(cliId);
-    if (!res.affected) throw new NotFoundException('Cliente no encontrado');
+  // TOGGLE STATUS
+  async toggleStatus(cliId: number): Promise<ClienteResponseDto> {
+    const cliente = await this.repo.findOne({ where: { cliId } });
+    if (!cliente) throw new NotFoundException(`Cliente con ID ${cliId} no encontrado`);
+
+    // Inversión simple de booleano
+    cliente.status = !cliente.status;
+    
+    const saved = await this.repo.save(cliente);
+    return this.toResponseDto(saved);
+  }
+
+  // DELETE
+  async remove(cliId: number): Promise<{ deleted: true }> {
+    const res = await this.repo.softDelete(cliId);
+    
+    if (res.affected === 0) {
+      throw new NotFoundException(`Cliente con ID ${cliId} no encontrado`);
+    }
+
     return { deleted: true };
   }
 }

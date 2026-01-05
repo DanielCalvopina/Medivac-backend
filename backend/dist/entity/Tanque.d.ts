@@ -16,12 +16,12 @@ export declare class Tanque {
     tnqPermisoSct: string;
     tnqCapacidad: string;
     tnqDesc: string;
-    tnqPolizaSeguro: string | null;
-    tnqExpPoliza: Date | null;
+    tnqPolizaSeguro: string;
+    tnqExpPoliza: string;
     status: number;
-    createdAt: string;
-    updatedAt: string | null;
-    deletedAt: string | null;
+    createdAt: Date;
+    updatedAt: Date | null;
+    deletedAt: Date | null;
     docTanques: DocTanque[];
     mancTanqs: MancTanq[];
 }
