@@ -29,8 +29,6 @@ export class DescargaService {
       descargaBole: entity.descargaBole,
       descargaDensidad: entity.descargaDensidad,
       descargaTemperatura: entity.descargaTemperatura,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
       // Mapeo seguro de Folio
       folio: entity.fol ? ({ ...entity.fol } as any as FolioResponseDto) : null,
     };
@@ -40,7 +38,6 @@ export class DescargaService {
   async findAll(): Promise<DescargaItemsDto> {
     const list = await this.descargaRepo.find({
       relations: ['fol'],
-      order: { createdAt: 'DESC' }
     });
     return { items: { descargas: list.map(d => this.toResponseDto(d)) } };
   }
@@ -62,7 +59,6 @@ export class DescargaService {
     const list = await this.descargaRepo.find({
       where: { folId },
       relations: ['fol'],
-      order: { createdAt: 'DESC' }
     });
     return { items: { descargas: list.map(d => this.toResponseDto(d)) } };
   }

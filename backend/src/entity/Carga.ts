@@ -36,16 +36,6 @@ export class Carga {
   @Column("character varying", { name: "carga_temperatura", nullable: true, length: 255 })
   cargaTemperatura: string | null;
 
-  // --- AUDITORÍA ---
-  @CreateDateColumn({ name: "created_at" })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: "updated_at", nullable: true })
-  updatedAt: Date | null;
-
-  @DeleteDateColumn({ name: "deleted_at", nullable: true })
-  deletedAt: Date | null;
-
   // --- RELACIONES ---
 
   @ManyToOne(() => Folio, (folio) => folio.cargas)

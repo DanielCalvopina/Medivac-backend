@@ -44,9 +44,7 @@ export class DescargaResponseDto {
   descargaBole: string | null;
   descargaDensidad: string | null;
   descargaTemperatura: string | null;
-  createdAt: Date;
-  updatedAt: Date | null;
-  
+
   // Relación con Folio
   folio?: FolioResponseDto | null;
 }

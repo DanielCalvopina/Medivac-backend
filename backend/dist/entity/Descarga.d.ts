@@ -7,9 +7,6 @@ export declare class Descarga {
     descargaBole: string | null;
     descargaDensidad: string | null;
     descargaTemperatura: string | null;
-    createdAt: Date;
-    updatedAt: Date | null;
-    deletedAt: Date | null;
     fol: Folio;
     docDescargas: DocDescarga[];
 }

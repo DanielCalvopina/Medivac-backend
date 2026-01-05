@@ -32,15 +32,12 @@ let DescargaService = class DescargaService {
             descargaBole: entity.descargaBole,
             descargaDensidad: entity.descargaDensidad,
             descargaTemperatura: entity.descargaTemperatura,
-            createdAt: entity.createdAt,
-            updatedAt: entity.updatedAt,
             folio: entity.fol ? { ...entity.fol } : null,
         };
     }
     async findAll() {
         const list = await this.descargaRepo.find({
             relations: ['fol'],
-            order: { createdAt: 'DESC' }
         });
         return { items: { descargas: list.map(d => this.toResponseDto(d)) } };
     }
@@ -57,7 +54,6 @@ let DescargaService = class DescargaService {
         const list = await this.descargaRepo.find({
             where: { folId },
             relations: ['fol'],
-            order: { createdAt: 'DESC' }
         });
         return { items: { descargas: list.map(d => this.toResponseDto(d)) } };
     }

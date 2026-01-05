@@ -42,7 +42,7 @@ __decorate([
     __metadata("design:type", String)
 ], Terminal.prototype, "trmNombreCorto", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "trm_direccion", length: 255 }),
+    (0, typeorm_1.Column)("character varying", { name: "trm_direccion", length: 1050 }),
     __metadata("design:type", String)
 ], Terminal.prototype, "trmDireccion", void 0);
 __decorate([

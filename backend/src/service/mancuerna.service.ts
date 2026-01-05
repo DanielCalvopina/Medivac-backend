@@ -8,7 +8,7 @@ import { Tanque } from '../entity/Tanque';
 import { Dolly } from '../entity/Dolly';
 import { Operador } from '../entity/Operador';
 import { MancTanq } from '../entity/MancTanq';
-import { MancOp } from '../entity/MancOp'; // Importante
+import { MancOp } from '../entity/MancOp'; 
 
 import {
   CreateMancuernaDto,

@@ -64,12 +64,6 @@ export class CargaResponseDto {
   cargaBole: string | null;
   cargaDensidad: string | null;
   cargaTemperatura: string | null;
-  createdAt: Date;
-  updatedAt: Date | null;
-  
-  // ELIMINADO: folio (para evitar ciclo)
-  
-  // Lista de Sellos (Garantizado)
   sellos: SelloResponseDto[]; 
 }
 

@@ -22,9 +22,6 @@ let Carga = class Carga {
     cargaBole;
     cargaDensidad;
     cargaTemperatura;
-    createdAt;
-    updatedAt;
-    deletedAt;
     fol;
     sellos;
     docCargas;
@@ -58,18 +55,6 @@ __decorate([
     (0, typeorm_1.Column)("character varying", { name: "carga_temperatura", nullable: true, length: 255 }),
     __metadata("design:type", Object)
 ], Carga.prototype, "cargaTemperatura", void 0);
-__decorate([
-    (0, typeorm_1.CreateDateColumn)({ name: "created_at" }),
-    __metadata("design:type", Date)
-], Carga.prototype, "createdAt", void 0);
-__decorate([
-    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", nullable: true }),
-    __metadata("design:type", Object)
-], Carga.prototype, "updatedAt", void 0);
-__decorate([
-    (0, typeorm_1.DeleteDateColumn)({ name: "deleted_at", nullable: true }),
-    __metadata("design:type", Object)
-], Carga.prototype, "deletedAt", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => Folio_1.Folio, (folio) => folio.cargas),
     (0, typeorm_1.JoinColumn)([{ name: "fol_id", referencedColumnName: "folId" }]),

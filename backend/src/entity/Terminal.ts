@@ -21,7 +21,7 @@ export class Terminal {
   @Column("character varying", { name: "trm_nombre_corto", length: 255 })
   trmNombreCorto: string;
 
-  @Column("character varying", { name: "trm_direccion", length: 255 })
+  @Column("character varying", { name: "trm_direccion", length: 1050 })
   trmDireccion: string;
 
   @Column("character varying", { name: "trm_ubicacion", length: 1050 })

@@ -50,7 +50,7 @@ __decorate([
     __metadata("design:type", String)
 ], Estaciones.prototype, "etnsDireccion", void 0);
 __decorate([
-    (0, typeorm_1.Column)("character varying", { name: "etns_ubicacion", length: 255 }),
+    (0, typeorm_1.Column)("character varying", { name: "etns_ubicacion", length: 1050 }),
     __metadata("design:type", String)
 ], Estaciones.prototype, "etnsUbicacion", void 0);
 __decorate([

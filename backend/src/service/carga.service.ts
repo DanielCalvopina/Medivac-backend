@@ -38,8 +38,6 @@ export class CargaService {
       cargaBole: entity.cargaBole,
       cargaDensidad: entity.cargaDensidad,
       cargaTemperatura: entity.cargaTemperatura,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
       
       // ELIMINADO: Mapeo de folio
       
@@ -50,8 +48,7 @@ export class CargaService {
   // === FIND ALL ===
   async findAll(): Promise<CargaItemsDto> {
     const list = await this.cargaRepo.find({
-      relations: ['sellos'], // Solo traemos sellos, NO folio
-      order: { createdAt: 'DESC' }
+      relations: ['sellos'],
     });
     return { items: { cargas: list.map(c => this.toResponseDto(c)) } };
   }
@@ -72,8 +69,7 @@ export class CargaService {
   async findByFolio(folId: number): Promise<CargaItemsDto> {
     const list = await this.cargaRepo.find({
       where: { folId },
-      relations: ['sellos'], // Solo traemos sellos
-      order: { createdAt: 'DESC' }
+      relations: ['sellos'],
     });
     return { items: { cargas: list.map(c => this.toResponseDto(c)) } };
   }

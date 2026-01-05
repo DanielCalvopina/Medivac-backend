@@ -44,16 +44,6 @@ export class Descarga {
   })
   descargaTemperatura: string | null;
 
-  // --- AUDITORÍA ---
-  @CreateDateColumn({ name: "created_at" })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: "updated_at", nullable: true })
-  updatedAt: Date | null;
-
-  @DeleteDateColumn({ name: "deleted_at", nullable: true })
-  deletedAt: Date | null;
-
   // --- RELACIONES ---
 
   @ManyToOne(() => Folio, (folio) => folio.descargas, {

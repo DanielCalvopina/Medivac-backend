@@ -5,7 +5,7 @@ export class CreateEstacionesDto {
   @IsString() @MaxLength(255) ernsNombre: string;
   @IsString() @MaxLength(255) etnsNombreCorto: string;
   @IsString() @MaxLength(1050) etnsDireccion: string;
-  @IsString() @MaxLength(255) etnsUbicacion: string;
+  @IsString() @MaxLength(1050) etnsUbicacion: string;
 
   @IsOptional() @IsString() @MaxLength(255)
   etnsCiudad?: string | null;
@@ -19,7 +19,7 @@ export class UpdateEstacionesDto {
   @IsOptional() @IsString() @MaxLength(255) ernsNombre?: string;
   @IsOptional() @IsString() @MaxLength(255) etnsNombreCorto?: string;
   @IsOptional() @IsString() @MaxLength(1050) etnsDireccion?: string;
-  @IsOptional() @IsString() @MaxLength(255) etnsUbicacion?: string;
+  @IsOptional() @IsString() @MaxLength(1050) etnsUbicacion?: string;
   @IsOptional() @IsString() @MaxLength(255) etnsCiudad?: string | null;
   @IsOptional() @IsBoolean() status?: boolean;
   

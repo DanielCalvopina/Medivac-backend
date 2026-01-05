@@ -61,8 +61,6 @@ export class FolioService {
         cargaBole: c.cargaBole,
         cargaDensidad: c.cargaDensidad,
         cargaTemperatura: c.cargaTemperatura,
-        createdAt: c.createdAt,
-        updatedAt: c.updatedAt,
         folio: null, 
         sellos: (c.sellos || []).map(s => ({ sellosId: s.sellosId, sellosNum: s.sellosNum } as SelloResponseDto))
       } as CargaResponseDto;
@@ -76,8 +74,6 @@ export class FolioService {
         descargaBole: d.descargaBole,
         descargaDensidad: d.descargaDensidad,
         descargaTemperatura: d.descargaTemperatura,
-        createdAt: d.createdAt,
-        updatedAt: d.updatedAt,
         folio: null 
       } as DescargaResponseDto;
     });
