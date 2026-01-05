@@ -9,9 +9,6 @@ export declare class Carga {
     cargaBole: string | null;
     cargaDensidad: string | null;
     cargaTemperatura: string | null;
-    createdAt: Date;
-    updatedAt: Date | null;
-    deletedAt: Date | null;
     fol: Folio;
     sellos: Sellos[];
     docCargas: DocCarga[];

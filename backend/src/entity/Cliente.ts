@@ -34,10 +34,10 @@ export class Cliente {
   @Column("boolean", { name: "status", default: true })
   status: boolean;
 
-  @CreateDateColumn({ name: "created_at", type: 'date' })
+  @CreateDateColumn({ name: "created_at", type: 'date' ,  default: () => 'CURRENT_DATE'})
   createdAt: Date;
 
-  @UpdateDateColumn({ name: "updated_at", type: 'date', nullable: true })
+  @UpdateDateColumn({ name: "updated_at", type: 'date', nullable: true ,default: () => 'CURRENT_DATE'})
   updatedAt: Date | null;
 
   @DeleteDateColumn({ name: "deleted_at", type: 'date', nullable: true })

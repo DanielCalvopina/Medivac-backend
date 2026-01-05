@@ -40,15 +40,12 @@ let CargaService = class CargaService {
             cargaBole: entity.cargaBole,
             cargaDensidad: entity.cargaDensidad,
             cargaTemperatura: entity.cargaTemperatura,
-            createdAt: entity.createdAt,
-            updatedAt: entity.updatedAt,
             sellos: sellosDto
         };
     }
     async findAll() {
         const list = await this.cargaRepo.find({
             relations: ['sellos'],
-            order: { createdAt: 'DESC' }
         });
         return { items: { cargas: list.map(c => this.toResponseDto(c)) } };
     }
@@ -65,7 +62,6 @@ let CargaService = class CargaService {
         const list = await this.cargaRepo.find({
             where: { folId },
             relations: ['sellos'],
-            order: { createdAt: 'DESC' }
         });
         return { items: { cargas: list.map(c => this.toResponseDto(c)) } };
     }

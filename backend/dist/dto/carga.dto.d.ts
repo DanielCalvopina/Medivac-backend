@@ -26,8 +26,6 @@ export declare class CargaResponseDto {
     cargaBole: string | null;
     cargaDensidad: string | null;
     cargaTemperatura: string | null;
-    createdAt: Date;
-    updatedAt: Date | null;
     sellos: SelloResponseDto[];
 }
 export declare class CargaItemsDto {

@@ -28,7 +28,7 @@ export class Estaciones {
   @Column("character varying", { name: "etns_direccion", length: 1050 })
   etnsDireccion: string;
 
-  @Column("character varying", { name: "etns_ubicacion", length: 255 })
+  @Column("character varying", { name: "etns_ubicacion", length: 1050 })
   etnsUbicacion: string;
 
   @Column("character varying", { name: "etns_ciudad", nullable: true, length: 255 })

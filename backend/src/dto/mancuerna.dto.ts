@@ -12,7 +12,7 @@ export class CreateMancuernaDto {
   @IsOptional() @IsString() @MaxLength(60) mncNom?: string;
   @IsOptional() @IsString() @MaxLength(60) npmcDesc?: string;
   
-  // Array de IDs de tanques
+  // Array de IDs de tanques  
   @IsOptional() @IsArray() tanquesIds?: number[];
 }
 

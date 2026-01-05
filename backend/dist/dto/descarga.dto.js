@@ -84,8 +84,6 @@ class DescargaResponseDto {
     descargaBole;
     descargaDensidad;
     descargaTemperatura;
-    createdAt;
-    updatedAt;
     folio;
 }
 exports.DescargaResponseDto = DescargaResponseDto;

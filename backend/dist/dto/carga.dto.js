@@ -118,8 +118,6 @@ class CargaResponseDto {
     cargaBole;
     cargaDensidad;
     cargaTemperatura;
-    createdAt;
-    updatedAt;
     sellos;
 }
 exports.CargaResponseDto = CargaResponseDto;

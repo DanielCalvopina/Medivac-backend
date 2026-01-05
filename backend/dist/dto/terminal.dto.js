@@ -33,7 +33,7 @@ __decorate([
 ], CreateTerminalDto.prototype, "trmNombreCorto", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(255),
+    (0, class_validator_1.MaxLength)(1050),
     __metadata("design:type", String)
 ], CreateTerminalDto.prototype, "trmDireccion", void 0);
 __decorate([
@@ -94,7 +94,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(255),
+    (0, class_validator_1.MaxLength)(1050),
     __metadata("design:type", String)
 ], UpdateTerminalDto.prototype, "trmTipo", void 0);
 __decorate([

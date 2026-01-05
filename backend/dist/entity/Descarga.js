@@ -20,9 +20,6 @@ let Descarga = class Descarga {
     descargaBole;
     descargaDensidad;
     descargaTemperatura;
-    createdAt;
-    updatedAt;
-    deletedAt;
     fol;
     docDescargas;
 };
@@ -63,18 +60,6 @@ __decorate([
     }),
     __metadata("design:type", Object)
 ], Descarga.prototype, "descargaTemperatura", void 0);
-__decorate([
-    (0, typeorm_1.CreateDateColumn)({ name: "created_at" }),
-    __metadata("design:type", Date)
-], Descarga.prototype, "createdAt", void 0);
-__decorate([
-    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", nullable: true }),
-    __metadata("design:type", Object)
-], Descarga.prototype, "updatedAt", void 0);
-__decorate([
-    (0, typeorm_1.DeleteDateColumn)({ name: "deleted_at", nullable: true }),
-    __metadata("design:type", Object)
-], Descarga.prototype, "deletedAt", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => Folio_1.Folio, (folio) => folio.descargas, {
         onDelete: "RESTRICT",

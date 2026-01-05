@@ -59,11 +59,11 @@ __decorate([
     __metadata("design:type", Boolean)
 ], Cliente.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)({ name: "created_at", type: 'date' }),
+    (0, typeorm_1.CreateDateColumn)({ name: "created_at", type: 'date', default: () => 'CURRENT_DATE' }),
     __metadata("design:type", Date)
 ], Cliente.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", type: 'date', nullable: true }),
+    (0, typeorm_1.UpdateDateColumn)({ name: "updated_at", type: 'date', nullable: true, default: () => 'CURRENT_DATE' }),
     __metadata("design:type", Object)
 ], Cliente.prototype, "updatedAt", void 0);
 __decorate([
