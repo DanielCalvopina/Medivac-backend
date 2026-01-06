@@ -2,13 +2,13 @@
 
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY backend/package.json backend/package-lock.json ./
 RUN npm ci
 
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY backend/ ./
 RUN npm run build && npm prune --omit=dev
 
 FROM node:20-alpine AS runner
@@ -22,8 +22,5 @@ COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/dist ./dist
 
 USER node
-
-# Documenta 3500 como puerto "default"
 EXPOSE 3500
-
 CMD ["node", "dist/main"]
