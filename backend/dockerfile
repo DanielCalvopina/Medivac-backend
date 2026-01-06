@@ -17,10 +17,19 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3500
 
-COPY --from=build --chown=node:node /app/package.json ./package.json
-COPY --from=build --chown=node:node /app/node_modules ./node_modules
-COPY --from=build --chown=node:node /app/dist ./dist
+COPY --from=build /app/package.json ./package.json
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+
+# Carpeta donde vamos a escribir los JSON
+RUN mkdir -p /app/config && chown -R node:node /app/config
 
 USER node
 EXPOSE 3500
-CMD ["node", "dist/main"]
+
+# Crea los archivos desde variables B64 (si existen) y luego arranca
+CMD ["sh", "-c", "\
+  if [ -n \"$GOOGLE_OAUTH_CLIENT_B64\" ]; then echo \"$GOOGLE_OAUTH_CLIENT_B64\" | base64 -d > /app/config/client_secret.json; fi; \
+  if [ -n \"$GOOGLE_OAUTH_TOKENS_B64\" ]; then echo \"$GOOGLE_OAUTH_TOKENS_B64\" | base64 -d > /app/config/oauth_tokens.json; fi; \
+  node dist/main \
+"]
