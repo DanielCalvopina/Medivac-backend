@@ -14,7 +14,7 @@ async function bootstrap() {
   // Trust proxy (Railway / reverse proxy)
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
 
-  const origins = (process.env.CORS_ORIGINS ?? 'http://localhost:3000')
+  const origins = (process.env.CORS_ORIGINS ?? 'https://medivac-front-web-production.up.railway.app/rutas')
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean);
