@@ -7,10 +7,15 @@ const response_envelope_interceptor_1 = require("./common/interceptors/response-
 const all_exceptions_filter_1 = require("./common/filters/all-exceptions.filter");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {
-        logger: ['error', 'warn'],
+        logger: ['error', 'warn', 'log'],
     });
+    app.getHttpAdapter().getInstance().set('trust proxy', 1);
+    const origins = (process.env.CORS_ORIGINS ?? 'http://localhost:3000')
+        .split(',')
+        .map((o) => o.trim())
+        .filter(Boolean);
     const corsOptions = {
-        origin: ['http://localhost:3000'],
+        origin: origins,
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
@@ -24,8 +29,9 @@ async function bootstrap() {
     }));
     app.useGlobalInterceptors(new response_envelope_interceptor_1.ResponseEnvelopeInterceptor());
     app.useGlobalFilters(new all_exceptions_filter_1.AllExceptionsFilter());
-    await app.listen(3500);
-    console.log(`🚀 Servidor backend corriendo en http://localhost:3500`);
+    const port = Number(process.env.PORT) || 3500;
+    await app.listen(port, '0.0.0.0');
+    console.log(`🚀 Backend corriendo en puerto ${port}`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map
