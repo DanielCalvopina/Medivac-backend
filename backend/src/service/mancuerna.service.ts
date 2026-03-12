@@ -249,24 +249,30 @@ export class MancuernaService {
     const item = await this.mancuernaRepo.findOne({
       where: { mncId },
       relations: [
-        'tracto', 'dolly', 
+        'dolly', 
         'mancTanqs', 'mancTanqs.tnq',
-        // IMPORTANTE: traer mancOps y su relación operador
       ], 
     });
 
     if (!item) throw new NotFoundException(`Mancuerna ${mncId} no encontrada`);
 
-    // Truco: Para el historial completo (incluyendo soft-deleted), hacemos query aparte
-    // porque findOne a veces filtra los deleted de las relaciones hijos.
+    // Cargar tracto por separado con withDeleted:true
+    // TypeORM excluye soft-deleted en JOINs automáticamente, por eso tracto llega null
+    if (item.trPlc) {
+      item.tracto = (await this.tractoRepo.findOne({
+        where: { trPlc: item.trPlc },
+        withDeleted: true,
+      })) as Tracto;
+    }
+
+    // Historial completo de operadores (incluyendo soft-deleted)
     const historialCompleto = await this.mancOpRepo.find({
       where: { mncId },
-      withDeleted: true, // Traer históricos
+      withDeleted: true,
       relations: ['operador'],
       order: { createdAt: 'DESC' }
     });
     
-    // Asignamos manual para que el mapper lo use
     item.mancOps = historialCompleto;
 
     return { items: { mancuerna: this.toResponseDto(item) } };
@@ -278,16 +284,22 @@ export class MancuernaService {
   async findAll(): Promise<MancuernaItemsDto> {
     const list = await this.mancuernaRepo.find({
       relations: [
-        'tracto', 'dolly', 
+        'dolly', 
         'mancTanqs', 'mancTanqs.tnq', 
         'mancOps', 'mancOps.operador'
       ],
       order: { createdAt: 'DESC' },
     });
-    
-    // Nota: findAll traerá en mancOps solo los activos (sin deletedAt) por defecto.
-    // Si quieres historial completo en el listado masivo, sería muy pesado,
-    // así que dejamos el comportamiento por defecto (solo mostrará el operador actual).
+
+    // Cargar tractos por separado con withDeleted:true (pueden estar soft-deleted)
+    for (const m of list) {
+      if (m.trPlc) {
+        m.tracto = (await this.tractoRepo.findOne({
+          where: { trPlc: m.trPlc },
+          withDeleted: true,
+        })) as Tracto;
+      }
+    }
     
     return { items: { mancuernas: list.map(m => this.toResponseDto(m)) } };
   }

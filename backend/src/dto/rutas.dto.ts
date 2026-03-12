@@ -20,6 +20,12 @@ export class CreateRutasDto {
 
   @IsOptional() @IsString() @MaxLength(255)
   rtsDestino?: string;
+
+  @IsOptional() @IsString() @MaxLength(100)
+  rtsPlusCode?: string;
+
+  @IsOptional() @IsString() @MaxLength(255)
+  rtsLugarManiobra?: string;
 }
 
 export class UpdateRutasDto extends PartialType(CreateRutasDto) {}
@@ -32,6 +38,8 @@ export class RutasResponseDto {
   rtsMaps: string | null;
   rtsOrigen: string | null;
   rtsDestino: string | null;
+  rtsPlusCode: string | null;
+  rtsLugarManiobra: string | null;
   status: boolean;
   createdAt: Date | string;
   updatedAt: Date | string | null;

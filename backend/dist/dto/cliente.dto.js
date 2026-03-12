@@ -18,6 +18,7 @@ class CreateClienteDto {
     cliCorreo;
     cliNum;
     cliRuc;
+    cliContacto;
     status;
 }
 exports.CreateClienteDto = CreateClienteDto;
@@ -48,6 +49,12 @@ __decorate([
 ], CreateClienteDto.prototype, "cliRuc", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(150),
+    __metadata("design:type", String)
+], CreateClienteDto.prototype, "cliContacto", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreateClienteDto.prototype, "status", void 0);
@@ -61,6 +68,7 @@ class ClienteResponseDto {
     cliCorreo;
     cliNum;
     cliRuc;
+    cliContacto;
     status;
     createdAt;
     updatedAt;

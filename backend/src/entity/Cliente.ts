@@ -31,6 +31,9 @@ export class Cliente {
   @Column("character varying", { name: "cli_ruc", length: 30 })
   cliRuc: string;
 
+  @Column({ name: 'cli_contacto', type: 'varchar', length: 150, nullable: true })
+  cliContacto: string | null;
+
   @Column("boolean", { name: "status", default: true })
   status: boolean;
 

@@ -87,11 +87,9 @@ export class Tracto {
   // ==========================
   //       RELACIONES
   // ==========================
-  // CORRECCIÓN 1: Apuntar a la propiedad correcta en DocTracto (seguramente es trPlc)
-  @OneToMany(() => DocTracto, (docTracto) => docTracto.trPlc)
+  @OneToMany(() => DocTracto, (docTracto) => docTracto.trPlc2)
   docTractos: DocTracto[];
 
-  // CORRECCIÓN 2: El error decía explícitamente "Did you mean 'trPlc'?"
-  @OneToMany(() => Mancuerna, (mancuerna) => mancuerna.trPlc)
+  @OneToMany(() => Mancuerna, (mancuerna) => mancuerna.tracto)
   mancuernas: Mancuerna[];
 }

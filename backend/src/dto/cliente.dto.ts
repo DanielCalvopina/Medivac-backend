@@ -18,6 +18,9 @@ export class CreateClienteDto {
   @IsString() @MaxLength(30)
   cliRuc: string;
 
+  @IsOptional() @IsString() @MaxLength(150)
+  cliContacto?: string;
+
   @IsOptional() @IsBoolean()
   status?: boolean;
 }
@@ -32,6 +35,7 @@ export class ClienteResponseDto {
   cliCorreo: string;
   cliNum: string;
   cliRuc: string;
+  cliContacto: string | null;
   status: boolean;
   createdAt: Date | string;
   updatedAt: Date | string | null;

@@ -19,6 +19,8 @@ class CreateRutasDto {
     rtsMaps;
     rtsOrigen;
     rtsDestino;
+    rtsPlusCode;
+    rtsLugarManiobra;
 }
 exports.CreateRutasDto = CreateRutasDto;
 __decorate([
@@ -54,6 +56,18 @@ __decorate([
     (0, class_validator_1.MaxLength)(255),
     __metadata("design:type", String)
 ], CreateRutasDto.prototype, "rtsDestino", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(100),
+    __metadata("design:type", String)
+], CreateRutasDto.prototype, "rtsPlusCode", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(255),
+    __metadata("design:type", String)
+], CreateRutasDto.prototype, "rtsLugarManiobra", void 0);
 class UpdateRutasDto extends (0, mapped_types_1.PartialType)(CreateRutasDto) {
 }
 exports.UpdateRutasDto = UpdateRutasDto;
@@ -64,6 +78,8 @@ class RutasResponseDto {
     rtsMaps;
     rtsOrigen;
     rtsDestino;
+    rtsPlusCode;
+    rtsLugarManiobra;
     status;
     createdAt;
     updatedAt;

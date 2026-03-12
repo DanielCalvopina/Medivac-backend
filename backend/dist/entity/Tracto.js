@@ -124,11 +124,11 @@ __decorate([
     __metadata("design:type", Object)
 ], Tracto.prototype, "deletedAt", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => DocTracto_1.DocTracto, (docTracto) => docTracto.trPlc),
+    (0, typeorm_1.OneToMany)(() => DocTracto_1.DocTracto, (docTracto) => docTracto.trPlc2),
     __metadata("design:type", Array)
 ], Tracto.prototype, "docTractos", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => Mancuerna_1.Mancuerna, (mancuerna) => mancuerna.trPlc),
+    (0, typeorm_1.OneToMany)(() => Mancuerna_1.Mancuerna, (mancuerna) => mancuerna.tracto),
     __metadata("design:type", Array)
 ], Tracto.prototype, "mancuernas", void 0);
 exports.Tracto = Tracto = __decorate([

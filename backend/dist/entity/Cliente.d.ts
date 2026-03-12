@@ -8,6 +8,7 @@ export declare class Cliente {
     cliCorreo: string;
     cliNum: string;
     cliRuc: string;
+    cliContacto: string | null;
     status: boolean;
     createdAt: Date;
     updatedAt: Date | null;

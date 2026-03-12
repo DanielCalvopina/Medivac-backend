@@ -187,12 +187,18 @@ let MancuernaService = class MancuernaService {
         const item = await this.mancuernaRepo.findOne({
             where: { mncId },
             relations: [
-                'tracto', 'dolly',
+                'dolly',
                 'mancTanqs', 'mancTanqs.tnq',
             ],
         });
         if (!item)
             throw new common_1.NotFoundException(`Mancuerna ${mncId} no encontrada`);
+        if (item.trPlc) {
+            item.tracto = (await this.tractoRepo.findOne({
+                where: { trPlc: item.trPlc },
+                withDeleted: true,
+            }));
+        }
         const historialCompleto = await this.mancOpRepo.find({
             where: { mncId },
             withDeleted: true,
@@ -205,12 +211,20 @@ let MancuernaService = class MancuernaService {
     async findAll() {
         const list = await this.mancuernaRepo.find({
             relations: [
-                'tracto', 'dolly',
+                'dolly',
                 'mancTanqs', 'mancTanqs.tnq',
                 'mancOps', 'mancOps.operador'
             ],
             order: { createdAt: 'DESC' },
         });
+        for (const m of list) {
+            if (m.trPlc) {
+                m.tracto = (await this.tractoRepo.findOne({
+                    where: { trPlc: m.trPlc },
+                    withDeleted: true,
+                }));
+            }
+        }
         return { items: { mancuernas: list.map(m => this.toResponseDto(m)) } };
     }
 };

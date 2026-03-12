@@ -32,6 +32,12 @@ export class Rutas {
   @Column("character varying", { name: "rts_destino", nullable: true, length: 255 })
   rtsDestino: string | null;
 
+  @Column({ name: 'rts_plus_code', type: 'varchar', length: 100, nullable: true })
+  rtsPlusCode: string | null;
+
+  @Column({ name: 'rts_lugar_maniobra', type: 'varchar', length: 255, nullable: true })
+  rtsLugarManiobra: string | null;
+
   // --- AUTOMATIZACIÓN ---
   @CreateDateColumn({ name: "created_at", type: 'date' })
   createdAt: Date;

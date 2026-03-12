@@ -21,6 +21,7 @@ let Cliente = class Cliente {
     cliCorreo;
     cliNum;
     cliRuc;
+    cliContacto;
     status;
     createdAt;
     updatedAt;
@@ -54,6 +55,10 @@ __decorate([
     (0, typeorm_1.Column)("character varying", { name: "cli_ruc", length: 30 }),
     __metadata("design:type", String)
 ], Cliente.prototype, "cliRuc", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'cli_contacto', type: 'varchar', length: 150, nullable: true }),
+    __metadata("design:type", Object)
+], Cliente.prototype, "cliContacto", void 0);
 __decorate([
     (0, typeorm_1.Column)("boolean", { name: "status", default: true }),
     __metadata("design:type", Boolean)

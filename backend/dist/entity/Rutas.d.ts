@@ -7,6 +7,8 @@ export declare class Rutas {
     rtsMaps: string | null;
     rtsOrigen: string | null;
     rtsDestino: string | null;
+    rtsPlusCode: string | null;
+    rtsLugarManiobra: string | null;
     createdAt: Date;
     updatedAt: Date | null;
     deletedAt: Date | null;

@@ -4,6 +4,7 @@ export declare class CreateClienteDto {
     cliCorreo: string;
     cliNum: string;
     cliRuc: string;
+    cliContacto?: string;
     status?: boolean;
 }
 declare const UpdateClienteDto_base: import("@nestjs/mapped-types").MappedType<Partial<CreateClienteDto>>;
@@ -16,6 +17,7 @@ export declare class ClienteResponseDto {
     cliCorreo: string;
     cliNum: string;
     cliRuc: string;
+    cliContacto: string | null;
     status: boolean;
     createdAt: Date | string;
     updatedAt: Date | string | null;

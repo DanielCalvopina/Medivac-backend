@@ -20,6 +20,8 @@ let Rutas = class Rutas {
     rtsMaps;
     rtsOrigen;
     rtsDestino;
+    rtsPlusCode;
+    rtsLugarManiobra;
     createdAt;
     updatedAt;
     deletedAt;
@@ -54,6 +56,14 @@ __decorate([
     (0, typeorm_1.Column)("character varying", { name: "rts_destino", nullable: true, length: 255 }),
     __metadata("design:type", Object)
 ], Rutas.prototype, "rtsDestino", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'rts_plus_code', type: 'varchar', length: 100, nullable: true }),
+    __metadata("design:type", Object)
+], Rutas.prototype, "rtsPlusCode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'rts_lugar_maniobra', type: 'varchar', length: 255, nullable: true }),
+    __metadata("design:type", Object)
+], Rutas.prototype, "rtsLugarManiobra", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)({ name: "created_at", type: 'date' }),
     __metadata("design:type", Date)
