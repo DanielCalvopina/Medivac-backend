@@ -40,9 +40,9 @@ export class UnidadesService {
   // Renombrado de items() a getUnidades()
   async getUnidades(): Promise<UnidadesItemsDto> {
     const [tractos, tanques, dollies] = await Promise.all([
-      this.tractoRepo.find({ order: { createdAt: 'DESC' } }),
-      this.tanqueRepo.find({ order: { createdAt: 'DESC' } }),
-      this.dollyRepo.find({ order: { createdAt: 'DESC' } }),
+      this.tractoRepo.find({ withDeleted: true, order: { createdAt: 'DESC' } }),
+      this.tanqueRepo.find({ withDeleted: true, order: { createdAt: 'DESC' } }),
+      this.dollyRepo.find({ withDeleted: true, order: { createdAt: 'DESC' } }),
     ]);
 
     return {
@@ -58,12 +58,12 @@ export class UnidadesService {
   //          TRACTOS
   // ==========================
   async listTractos(): Promise<TractoResponseDto[]> {
-    const items = await this.tractoRepo.find({ order: { createdAt: 'DESC' } });
+    const items = await this.tractoRepo.find({ withDeleted: true, order: { createdAt: 'DESC' } });
     return items.map((x) => this.tractoToResponse(x));
   }
 
   async getTracto(trPlc: string): Promise<TractoResponseDto> {
-    const item = await this.tractoRepo.findOne({ where: { trPlc } });
+    const item = await this.tractoRepo.findOne({ where: { trPlc }, withDeleted: true });
     if (!item) throw new NotFoundException('Tracto no encontrado');
     return this.tractoToResponse(item);
   }
